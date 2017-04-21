@@ -1,5 +1,6 @@
 package ng.jifudaily.view.base;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -7,17 +8,17 @@ import android.util.Log;
 
 import javax.inject.Inject;
 
+import ng.jifudaily.support.container.ContainerActivity;
 import ng.jifudaily.support.ioc.service.ServiceCollection;
 
 /**
  * Created by Ng on 2017/4/20.
  */
 
-public abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity implements ContainerActivity{
 
     @Inject
     ServiceCollection services;
-
 
     protected ServiceCollection getServices() {
         return services;
@@ -28,36 +29,56 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-        Log.e("asdfasdf", "BaseCreate");
-
         ((App) getApplication()).getServiceComponent().injectTo(this);
+    }
 
-//        Retrofit.Builder n = new Retrofit.Builder();
-//        OkHttpClient.Builder h = new OkHttpClient.Builder();
-//
-//        h.connectTimeout(1000, TimeUnit.MILLISECONDS);
-//
-//        n.baseUrl("http://news-at.zhihu.com/api/4/news/")
-//                .                client(h.build())
-//                .addConverterFactory(GsonConverterFactory.create(new Gson()))
-//                .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
-//        Retrofit r = n.build();
-//        r.create(DailyNewsResource.class).latestNews()
-//                .subscribeOn(Schedulers.io())
-//                .unsubscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(x -> {
-//                    Log.e("asdfadsf", x.getStories().get(0).getTitle());
-//                    getServices().log().error("asdfadsf", x.getStories().get(0).getTitle());
-//                }, e -> {
-//                    Log.e("asdfasdf", e.getMessage());
-//                });
+    @Override
+    public void onNewIntent(Intent intent) {
 
+    }
 
-//        DaggerServiceComponent.builder()
-//                .build();
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
 
+    }
 
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+
+    }
+
+    @Override
+    public void onStart() {
+
+    }
+
+    @Override
+    public void onResume() {
+
+    }
+
+    @Override
+    public void onPause() {
+
+    }
+
+    @Override
+    public void onStop() {
+
+    }
+
+    @Override
+    public void onRestart() {
+
+    }
+
+    @Override
+    public void onDestroy() {
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
     }
 }

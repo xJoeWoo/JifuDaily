@@ -13,13 +13,10 @@ public class App extends Application {
 
     private ServiceComponent serviceComponent ;
 
-
     @Override
     public void onCreate() {
         super.onCreate();
-
         serviceComponent = DaggerServiceComponent.create();
-
     }
 
     public ServiceComponent getServiceComponent() {
