@@ -4,14 +4,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.annotation.LayoutRes;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+import ng.jifudaily.support.util.Disposable;
+import ng.jifudaily.support.util.LifeCycle;
+
 
 /**
  * Created by Ng on 2017/4/21.
  */
 
-public class Container implements LifeCycle {
+public class Container implements LifeCycle, Disposable {
+
+    public static final int DEFAULT_ID = -1;
 
     private View rootView;
 
@@ -19,34 +30,55 @@ public class Container implements LifeCycle {
 
     private boolean visibleToUser = true;
 
-    private Container(int containerId, View rootView) {
+    public Container() {
+    }
+
+    public Container(int containerId, View rootView) {
         this.containerId = containerId;
         bind(rootView);
     }
 
     public Container bind(View rootView) {
-        if (this.rootView != null && !(rootView instanceof ContainerView)) {
-            throw new IllegalArgumentException("Need container view");
-        }
-
         this.rootView = rootView;
-
         if (rootView != null) {
             onBind(this.rootView);
         }
-
         return this;
+    }
+
+    public Container bind(@LayoutRes int layoutId, Context context) {
+        bind(LayoutInflater.from(context).inflate(layoutId, null));
+        return this;
+    }
+
+
+    public Container id(int id) {
+        containerId = id;
+        return this;
+    }
+
+    public View getContainingView() {
+        return rootView;
     }
 
     public int getContainerId() {
         return containerId;
     }
 
+    protected void onBind(View v) {
+    }
+
     public void onVisibleToUser(boolean isVisible) {
         visibleToUser = isVisible;
     }
 
-    protected void onBind(View v) {
+    public void onBeforeAttach() {
+    }
+
+    public void onAttached() {
+    }
+
+    public void onDetached() {
     }
 
     @Override
@@ -113,10 +145,16 @@ public class Container implements LifeCycle {
         }
     }
 
-    public static final class Builder {
-        private int containerId = -1;
+    @Override
+    public void dispose() {
+        rootView.setVisibility(View.GONE);
+    }
 
-        private View rootView = null;
+
+    public static class Builder {
+
+        private int containerId = DEFAULT_ID;
+        private View view;
 
         public Builder() {
         }
@@ -127,14 +165,32 @@ public class Container implements LifeCycle {
         }
 
         public Builder bind(View view) {
-            this.rootView = view;
+            this.view = view;
             return this;
         }
 
-        public Container build(){
-            return new Container(containerId, rootView);
+        public Builder bind(@LayoutRes int layoutId, Context context) {
+            this.view = LayoutInflater.from(context).inflate(layoutId, null);
+            return this;
+        }
+
+        public Builder reset() {
+            containerId = DEFAULT_ID;
+            view = null;
+            return this;
+        }
+
+        public <T extends Container> T build(Class<T> clz) {
+            if (view == null) {
+                throw new IllegalArgumentException("Need rootView to bind a container");
+            }
+            try {
+                Constructor<T> constructor = clz.getConstructor(int.class, View.class);
+                return constructor.newInstance(containerId, view);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
     }
-
-
 }

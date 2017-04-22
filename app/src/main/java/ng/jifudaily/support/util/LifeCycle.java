@@ -1,4 +1,4 @@
-package ng.jifudaily.support.container;
+package ng.jifudaily.support.util;
 
 import android.content.Intent;
 import android.os.Bundle;

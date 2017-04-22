@@ -1,8 +1,8 @@
 package ng.jifudaily.support.net.resource;
 
 import io.reactivex.Flowable;
-import ng.jifudaily.support.net.bean.NewsContentBean;
-import ng.jifudaily.support.net.bean.LatestNewsBean;
+import ng.jifudaily.support.net.entity.NewsContentEntity;
+import ng.jifudaily.support.net.entity.LatestNewsEntity;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 
@@ -12,8 +12,8 @@ import retrofit2.http.Path;
 
 public interface DailyNewsResource {
     @GET("latest")
-    Flowable<LatestNewsBean> latestNews();
+    Flowable<LatestNewsEntity> latestNews();
 
     @GET("{id}")
-    Flowable<NewsContentBean> newsContent(@Path("id") int id);
+    Flowable<NewsContentEntity> newsContent(@Path("id") int id);
 }

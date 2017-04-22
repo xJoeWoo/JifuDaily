@@ -1,13 +1,6 @@
 package ng.jifudaily;
 
 import org.junit.Test;
-import org.reactivestreams.Subscription;
-
-import ng.jifudaily.support.ioc.component.DaggerServiceComponent;
-import ng.jifudaily.support.ioc.component.ServiceComponent;
-import ng.jifudaily.support.net.bean.LatestNewsBean;
-import ng.jifudaily.support.tool.SubscriberAdapter;
-import ng.jifudaily.test.ServicesContainer;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -21,9 +14,9 @@ public class ExampleUnitTest {
 //        try {
 //            ServiceComponent s = DaggerServiceComponent.create();
 //            ServicesContainer c = new ServicesContainer();
-//            s.injectTo(c);
+//            s.inject(c);
 //
-//            c.getServices().daily().getLatestNews(new SubscriberAdapter<LatestNewsBean>() {
+//            c.getServices().daily().getLatestNews(new SubscriberAdapter<LatestNewsEntity>() {
 //
 //                @Override
 //                public void onSubscribe(Subscription s) {
@@ -38,8 +31,8 @@ public class ExampleUnitTest {
 //                }
 //
 //                @Override
-//                public void onNext(LatestNewsBean latestNewsBean) {
-//                    System.out.println(latestNewsBean.getStories().get(1).getTitle());
+//                public void onNext(LatestNewsEntity latestNewsBean) {
+//                    System.out.println(latestNewsBean.getStories().getContainer(1).getTitle());
 //                }
 //
 //                @Override

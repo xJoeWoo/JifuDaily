@@ -1,4 +1,4 @@
-package ng.jifudaily.support.net.bean;
+package ng.jifudaily.support.net.entity;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -8,11 +8,11 @@ import java.util.List;
  * Created by Ng on 2017/4/20.
  */
 
-public class LatestNewsBean extends BaseBean {
+public class LatestNewsEntity extends BaseEntity {
     private String date;
-    private List<StoryBean> stories;
+    private List<StoryEntity> stories;
     @SerializedName("top_stories")
-    private List<StoryBean> topStories;
+    private List<StoryEntity> topStories;
 
     public String getDate() {
         return date;
@@ -22,19 +22,19 @@ public class LatestNewsBean extends BaseBean {
         this.date = date;
     }
 
-    public List<StoryBean> getStories() {
+    public List<StoryEntity> getStories() {
         return stories;
     }
 
-    public void setStories(List<StoryBean> stories) {
+    public void setStories(List<StoryEntity> stories) {
         this.stories = stories;
     }
 
-    public List<StoryBean> getTopStories() {
+    public List<StoryEntity> getTopStories() {
         return topStories;
     }
 
-    public void setTopStories(List<StoryBean> topStories) {
+    public void setTopStories(List<StoryEntity> topStories) {
         this.topStories = topStories;
     }
 }

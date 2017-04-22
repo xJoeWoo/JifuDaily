@@ -4,14 +4,32 @@ package ng.jifudaily.support.ioc.conf;
  * Created by Ng on 2017/4/20.
  */
 
-public interface NetConf {
-    int getNetTimeout();
+public class NetConf {
+    private final int TIMEOUT = 10000;
 
-    String getBaseUrl();
+    private final String BASE_URL = "http://news-at.zhihu.com/api/4";
 
-    String getNewsAction();
+    private final String ACTION_NEWS = "news";
+    private final String ACTION_STORY = "story";
+    private final String ACTION_THEME = "theme";
 
-    String getStoryAction();
+    public int getNetTimeout() {
+        return TIMEOUT;
+    }
 
-    String getThemeAction();
+    public String getBaseUrl() {
+        return BASE_URL;
+    }
+
+    public String getNewsAction() {
+        return ACTION_NEWS;
+    }
+
+    public String getStoryAction() {
+        return ACTION_STORY;
+    }
+
+    public String getThemeAction() {
+        return ACTION_THEME;
+    }
 }

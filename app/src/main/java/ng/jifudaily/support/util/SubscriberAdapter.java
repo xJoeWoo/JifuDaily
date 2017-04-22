@@ -1,4 +1,4 @@
-package ng.jifudaily.support.tool;
+package ng.jifudaily.support.util;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;

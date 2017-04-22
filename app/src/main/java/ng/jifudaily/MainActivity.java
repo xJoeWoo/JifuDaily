@@ -5,36 +5,43 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
 
-import ng.jifudaily.support.net.bean.LatestNewsBean;
-import ng.jifudaily.support.tool.SubscriberAdapter;
-import ng.jifudaily.view.base.BaseActivity;
+import ng.jifudaily.support.container.Container;
+import ng.jifudaily.view.base.ContainerActivity;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends ContainerActivity {
+
+    public static final int LATEST_NEWS_CONTAINER = 1;
+    public static final int NEWS_CONTENT_CONTAINER = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.container_latest_news);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
 
 
-        try {
-            getServices().daily().getLatestNews().subscribe(new SubscriberAdapter<LatestNewsBean>() {
-                @Override
-                public void onNext(LatestNewsBean latestNewsBean) {
-                }
-            });
-        } catch (Exception e) {
-            getServices().log().error(e.getMessage());
+        getContainerManager().add(getContainerBuilder()
+                .bind(findViewById(R.id.main_tv))
+                .id(LATEST_NEWS_CONTAINER)
+                .bind(R.layout.container_latest_news, this)
+                .build(Container.class));
 
-        }
+        getServices().daily().getLatestNews().subscribe(x -> {
+            x.getStories().get(0).getId();
+        });
+
+//        Observable.timer(1000, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe(x -> {
+//            getContainerManager().getSwitcher().switchFrom(c1).to(c2);
+//        });
 
     }
+
 
 //    @Override
 //    public boolean onCreateOptionsMenu(Menu menu) {
@@ -47,7 +54,7 @@ public class MainActivity extends BaseActivity {
 //    public boolean onOptionsItemSelected(MenuItem item) {
 //        // Handle action bar item clicks here. The action bar will
 //        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
+//        // as you specify a parent bind in AndroidManifest.xml.
 //        int id = item.getItemId();
 //
 //        //noinspection SimplifiableIfStatement
@@ -58,3 +65,5 @@ public class MainActivity extends BaseActivity {
 //        return super.onOptionsItemSelected(item);
 //    }
 }
+
+

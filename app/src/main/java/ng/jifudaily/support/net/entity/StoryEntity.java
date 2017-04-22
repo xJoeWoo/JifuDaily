@@ -1,4 +1,4 @@
-package ng.jifudaily.support.net.bean;
+package ng.jifudaily.support.net.entity;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -8,7 +8,7 @@ import java.util.List;
  * Created by Ng on 2017/4/20.
  */
 
-public class StoryBean extends BaseBean {
+public class StoryEntity extends BaseEntity {
     private String title;
     @SerializedName("ga_prefix")
     private String gaPrefix;

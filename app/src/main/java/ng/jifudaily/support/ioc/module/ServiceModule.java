@@ -8,14 +8,10 @@ import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import ng.jifudaily.support.ioc.conf.NetConf;
-import ng.jifudaily.support.ioc.conf.NetConfImpl;
 import ng.jifudaily.support.ioc.log.LogService;
-import ng.jifudaily.support.ioc.log.LogServiceImpl;
 import ng.jifudaily.support.ioc.service.DailyService;
-import ng.jifudaily.support.ioc.service.DailyServiceImpl;
 import ng.jifudaily.support.ioc.service.NetService;
-import ng.jifudaily.support.ioc.service.NetServiceImpl;
-import ng.jifudaily.support.ioc.service.ServiceCollectionImpl;
+import ng.jifudaily.support.ioc.service.ServiceCollection;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -26,7 +22,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by Ng on 2017/4/20.
  */
 @Module
-public class ImplementModule {
+public class ServiceModule {
     @Provides
     @Singleton
     public OkHttpClient providesOkHttpClient(NetConf conf) {
@@ -56,32 +52,32 @@ public class ImplementModule {
 
     @Provides
     @Singleton
-    public NetServiceImpl providesNetServiceImpl(Retrofit.Builder retrofitBuilder) {
-        return new NetServiceImpl(retrofitBuilder);
+    public NetService providesNetService(Retrofit.Builder retrofitBuilder) {
+        return new NetService(retrofitBuilder);
     }
 
     @Provides
     @Singleton
-    public LogServiceImpl providesLogServiceImpl() {
-        return new LogServiceImpl();
+    public LogService providesLogService() {
+        return new LogService();
     }
 
     @Provides
     @Singleton
-    public DailyServiceImpl providesDailyServiceImpl(NetService netService, NetConfImpl netConf) {
-        return new DailyServiceImpl(netService, netConf);
+    public DailyService providesDailyService(NetService netService, NetConf netConf) {
+        return new DailyService(netService, netConf);
     }
 
     @Provides
     @Singleton
-    public ServiceCollectionImpl providesServiceCollectionImpl(Lazy<NetService> netService, Lazy<DailyService> dailyService, Lazy<LogService> logService) {
-        return new ServiceCollectionImpl(netService, dailyService, logService);
+    public ServiceCollection providesServiceCollection(Lazy<NetService> netService, Lazy<DailyService> dailyService, Lazy<LogService> logService) {
+        return new ServiceCollection(netService, dailyService, logService);
     }
 
     @Provides
     @Singleton
-    public NetConfImpl providesNetConfImpl() {
-        return new NetConfImpl();
+    public NetConf providesNetConf() {
+        return new NetConf();
     }
 
 
