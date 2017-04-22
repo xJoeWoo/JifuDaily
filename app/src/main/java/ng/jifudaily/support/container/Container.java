@@ -9,9 +9,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import org.reactivestreams.Subscriber;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.processors.PublishProcessor;
+import io.reactivex.subscribers.DefaultSubscriber;
+import io.reactivex.subscribers.DisposableSubscriber;
 import ng.jifudaily.support.util.Disposable;
 import ng.jifudaily.support.util.LifeCycle;
 
@@ -25,15 +34,12 @@ public class Container implements LifeCycle, Disposable {
     public static final int DEFAULT_ID = -1;
 
     private View rootView;
-
     private int containerId;
-
     private boolean visibleToUser = true;
+    private PublishProcessor<ContainerCallback> processor;
+    private io.reactivex.disposables.Disposable subDisposable;
 
-    public Container() {
-    }
-
-    public Container(int containerId, View rootView) {
+    protected Container(int containerId, View rootView) {
         this.containerId = containerId;
         bind(rootView);
     }
@@ -45,15 +51,31 @@ public class Container implements LifeCycle, Disposable {
         }
         return this;
     }
-
-    public Container bind(@LayoutRes int layoutId, Context context) {
-        bind(LayoutInflater.from(context).inflate(layoutId, null));
-        return this;
-    }
+//
+//    public Container bind(@LayoutRes int layoutId, Context context) {
+//        bind(LayoutInflater.from(context).inflate(layoutId, null));
+//        return this;
+//    }
 
 
     public Container id(int id) {
         containerId = id;
+        return this;
+    }
+
+    public Flowable<ContainerCallback> getFlowable() {
+        return getProcessor();
+    }
+
+    private PublishProcessor<ContainerCallback> getProcessor() {
+        if (processor == null) {
+            processor = PublishProcessor.create();
+        }
+        return processor;
+    }
+
+    public Container subscribe(DisposableSubscriber<ContainerCallback> subscriber) {
+        subDisposable = getProcessor().subscribeWith(subscriber);
         return this;
     }
 
@@ -66,6 +88,18 @@ public class Container implements LifeCycle, Disposable {
     }
 
     protected void onBind(View v) {
+    }
+
+    protected void publish(int what) {
+        publish(what, null);
+    }
+
+    protected void publish(int what, Object obj) {
+        getProcessor().onNext(new ContainerCallback(what, obj));
+    }
+
+    protected void publish(Object obj) {
+        publish(ContainerCallback.DEFAULT_WHAT, obj);
     }
 
     public void onVisibleToUser(boolean isVisible) {
@@ -147,6 +181,14 @@ public class Container implements LifeCycle, Disposable {
 
     @Override
     public void dispose() {
+        if (subDisposable != null) {
+            subDisposable.dispose();
+
+        }
+        if (processor != null) {
+            processor.onComplete();
+            processor = null;
+        }
         rootView.setVisibility(View.GONE);
     }
 
@@ -186,6 +228,7 @@ public class Container implements LifeCycle, Disposable {
             }
             try {
                 Constructor<T> constructor = clz.getConstructor(int.class, View.class);
+                constructor.setAccessible(true);
                 return constructor.newInstance(containerId, view);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 e.printStackTrace();

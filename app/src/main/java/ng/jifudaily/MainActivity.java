@@ -4,8 +4,11 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import ng.jifudaily.support.container.Container;
+import ng.jifudaily.support.container.ContainerCallback;
+import ng.jifudaily.support.util.SubscriberAdapter;
 import ng.jifudaily.view.base.ContainerActivity;
 
 public class MainActivity extends ContainerActivity {
@@ -26,11 +29,17 @@ public class MainActivity extends ContainerActivity {
                 .setAction("Action", null).show());
 
 
-        getContainerManager().add(getContainerBuilder()
-                .bind(findViewById(R.id.main_tv))
-                .id(LATEST_NEWS_CONTAINER)
-                .bind(R.layout.container_latest_news, this)
-                .build(Container.class));
+        getContainerManager().add(
+                getContainerBuilder()
+                        .bind(findViewById(R.id.main_tv))
+                        .id(LATEST_NEWS_CONTAINER)
+                        .bind(R.layout.container_latest_news, this)
+                        .build(Container.class)
+                        .subscribe(new SubscriberAdapter<ContainerCallback>() {
+                            @Override
+                            public void onNext(ContainerCallback callback) {
+                            }
+                        }));
 
         getServices().daily().getLatestNews().subscribe(x -> {
             x.getStories().get(0).getId();

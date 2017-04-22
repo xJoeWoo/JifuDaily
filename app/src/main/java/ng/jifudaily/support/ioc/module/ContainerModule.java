@@ -23,11 +23,6 @@ public class ContainerModule {
     }
 
     @Provides
-    public Container providesContainer() {
-        return new Container();
-    }
-
-    @Provides
     public Container.Builder providesContainerBuilder() {
         return new Container.Builder();
     }
@@ -37,8 +32,4 @@ public class ContainerModule {
         return new ContainerSwitcher();
     }
 
-    @Provides
-    public ContainerCallback providesContainerCallback() {
-        return new ContainerCallback();
-    }
 }

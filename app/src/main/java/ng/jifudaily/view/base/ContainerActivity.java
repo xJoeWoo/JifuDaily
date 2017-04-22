@@ -25,12 +25,6 @@ public class ContainerActivity extends BaseActivity {
     @Inject
     Provider<Container.Builder> builderProvider;
 
-    @Inject
-    Provider<Container> containerProvider;
-
-    @Inject
-    Provider<ContainerCallback> callbackProvider;
-
     //
 //    public ContainerActivity() {
 //        ((App) getApplication()).getActivityComponent().inject(this);
@@ -41,14 +35,6 @@ public class ContainerActivity extends BaseActivity {
 
     protected Container.Builder getContainerBuilder() {
         return builderProvider.get();
-    }
-
-    protected Container createDefaultContainer() {
-        return containerProvider.get();
-    }
-
-    protected ContainerCallback createContainerCallback() {
-        return callbackProvider.get();
     }
 
     protected ContainerSwitcher getContainerSwitcher() {

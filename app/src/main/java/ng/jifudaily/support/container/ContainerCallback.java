@@ -13,16 +13,20 @@ public class ContainerCallback {
     private int what = DEFAULT_WHAT;
     private Object obj;
 
-    public ContainerCallback() {
-    }
-
-    public ContainerCallback what(int what) {
+    public ContainerCallback(int what) {
         this.what = what;
-        return this;
     }
 
-    public ContainerCallback obj(Object obj) {
+    public ContainerCallback(int what, Object obj) {
+        this.what = what;
         this.obj = obj;
-        return this;
+    }
+
+    public int getWhat() {
+        return what;
+    }
+
+    public Object getObj() {
+        return obj;
     }
 }
