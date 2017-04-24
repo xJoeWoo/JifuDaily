@@ -1,4 +1,4 @@
-package ng.jifudaily.support.ioc.log;
+package ng.jifudaily.support.ioc.service;
 
 import android.util.Log;
 

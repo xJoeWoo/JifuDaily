@@ -32,7 +32,7 @@ public class ExampleUnitTest {
 //
 //                @Override
 //                public void onNext(LatestNewsEntity latestNewsBean) {
-//                    System.out.println(latestNewsBean.getStories().getContainer(1).getTitle());
+//                    System.out.println(latestNewsBean.getStories().createContainer(1).getTitle());
 //                }
 //
 //                @Override

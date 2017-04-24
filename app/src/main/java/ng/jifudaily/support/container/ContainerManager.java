@@ -1,17 +1,18 @@
 package ng.jifudaily.support.container;
 
-import android.app.Activity;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import dagger.Lazy;
+import ng.jifudaily.support.ioc.service.ServiceCollection;
 import ng.jifudaily.support.util.Action;
 import ng.jifudaily.view.base.App;
+import ng.jifudaily.view.base.ContainerActivity;
 
 /**
  * Created by Ng on 2017/4/21.
@@ -19,28 +20,43 @@ import ng.jifudaily.view.base.App;
 
 public class ContainerManager {
 
-    private Activity activity;
-    private List<Container> containers = new ArrayList<>();
+    private ContainerActivity activity;
+    private final List<Container> containers = new ArrayList<>();
 
     @Inject
     Lazy<ContainerSwitcher> switcherLazy;
 
 
-    public ContainerManager bind(Activity act) {
+    public ContainerManager bind(ContainerActivity act) {
         this.activity = act;
         ((App) activity.getApplication()).getContainerComponent().injectContainerManager(this);
         return this;
     }
 
     public ContainerManager add(Container container) {
-        containers.add(container);
+        if (!getContainers().contains(container)) {
+            getContainers().add(container);
+            container.manager(this);
+        }
         return this;
     }
 
     public ContainerManager remove(Container container) {
-        containers.remove(container);
+        getContainers().remove(container);
         return this;
     }
+
+    /**
+     * just a simple way add container then call <tt>Activity#setContent</tt>
+     *
+     * @param container
+     * @return
+     */
+    public ContainerManager show(Container container) {
+        getSwitcher().switchTo(container);
+        return this;
+    }
+
 
     /**
      * Remove all containers that using provided id
@@ -50,9 +66,9 @@ public class ContainerManager {
      */
     public boolean remove(int containerId) {
         boolean flag = false;
-        for (int i = 0; i < containers.size(); i++) {
-            if (containers.get(i).getContainerId() == containerId) {
-                containers.remove(i);
+        for (Iterator<Container> i = getContainers().iterator(); i.hasNext(); ) {
+            if (i.next().getContainerId() == containerId) {
+                i.remove();
                 flag = true;
             }
         }
@@ -60,11 +76,15 @@ public class ContainerManager {
     }
 
     public void clear() {
-        containers.clear();
+        getContainers().clear();
     }
 
-    public Activity getActivity() {
+    public ContainerActivity getActivity() {
         return activity;
+    }
+
+    public ServiceCollection getService() {
+        return activity.getServices();
     }
 
     /**
@@ -74,10 +94,11 @@ public class ContainerManager {
      * @return
      */
     @Nullable
-    public Container getContainer(int containerId) {
-        for (Container c : containers) {
+    public <T extends Container<T>> T getContainer(int containerId, Class<T> clz) {
+        List<Container> cs = getContainers();
+        for (Container c : cs) {
             if (c.getContainerId() == containerId) {
-                return c;
+                return clz.cast(c);
             }
         }
         return null;
@@ -87,7 +108,7 @@ public class ContainerManager {
 
     public ContainerSwitcher getSwitcher() {
         if (!switcherInited) {
-            switcherLazy.get().bind(this);
+            switcherLazy.get().manager(this);
             switcherInited = true;
         }
 
@@ -99,11 +120,21 @@ public class ContainerManager {
     }
 
     public int getContainersCount() {
-        return containers.size();
+        return getContainers().size();
     }
 
     public void callContainers(final Action<Container> callback) {
         containers.forEach(callback::onCall);
+    }
+
+    public boolean onBackPressed() {
+        for (Container c :
+                containers) {
+            if (c.onBackPressed()) {
+                return true;
+            }
+        }
+        return getSwitcher().back();
     }
 
 }

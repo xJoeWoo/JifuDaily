@@ -83,6 +83,17 @@ public class NewsContentEntity extends BaseEntity {
 
     private int id;
 
+    private String title;
+
+    public String getTitle() {
+        return title;
+    }
+
+    public NewsContentEntity setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
     @SerializedName("css")
     private List<String> cssUrls;
 
@@ -95,6 +106,17 @@ public class NewsContentEntity extends BaseEntity {
 
     @SerializedName("theme_id")
     private int themeId;
+
+    public String completeHTML;
+
+    public String getCompleteHTML() {
+        return completeHTML;
+    }
+
+    public NewsContentEntity setCompleteHTML(String completeHTML) {
+        this.completeHTML = completeHTML;
+        return this;
+    }
 
     public String getContentBody() {
         return contentBody;

@@ -1,5 +1,7 @@
 package ng.jifudaily.support.util;
 
+import android.util.Log;
+
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -17,7 +19,7 @@ public abstract class SubscriberAdapter<T> extends DisposableSubscriber<T> {
 
     @Override
     public void onError(Throwable t) {
-
+        Log.e("Subscriber", t.getMessage());
     }
 
     @Override

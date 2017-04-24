@@ -9,6 +9,9 @@ import java.util.List;
  */
 
 public class StoryEntity extends BaseEntity {
+
+    public static final int INVALID = -1;
+
     private String title;
     @SerializedName("ga_prefix")
     private String gaPrefix;
@@ -17,7 +20,7 @@ public class StoryEntity extends BaseEntity {
     @SerializedName("multipic")
     private String multiPic;
     private int type;
-    private int id;
+    private int id = INVALID;
 
     public String getMultiPic() {
         return multiPic;

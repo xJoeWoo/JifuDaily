@@ -23,7 +23,7 @@ public class BaseActivity extends AppCompatActivity {
 //        ((App) getApplication()).getActivityComponent().injectBaseActivity(this);
     }
 
-    protected ServiceCollection getServices() {
+    public ServiceCollection getServices() {
         return services;
     }
 

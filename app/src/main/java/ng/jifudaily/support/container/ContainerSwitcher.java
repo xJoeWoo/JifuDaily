@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
+import java.util.Stack;
+
 import javax.inject.Inject;
 
 /**
@@ -16,14 +18,53 @@ import javax.inject.Inject;
 public class ContainerSwitcher {
 
     private ContainerManager containerManager;
+    private Stack<Container> stack;
 
-    public ContainerSwitcher bind(ContainerManager containerManager) {
+
+    public ContainerSwitcher manager(ContainerManager containerManager) {
         this.containerManager = containerManager;
         return this;
     }
 
-    public ContainerSwitcherSource switchFrom(Container from) {
+    public boolean back() {
+        return back(true);
+    }
+
+    public boolean back(boolean disposePrevious) {
+        Stack<Container> stack = getContainersStack();
+        if (stack.size() < 2) {
+            return false;
+        }
+        switchFrom(stack.pop()).to(stack.peek(), disposePrevious, false);
+        return true;
+    }
+
+    /**
+     * if null, will call <tt>Activity#setContent</tt>
+     *
+     * @param from
+     * @return
+     */
+    private ContainerSwitcherSource switchFrom(Container from) {
         return new ContainerSwitcherSource(from);
+    }
+
+    public Container switchTo(Container to) {
+        return switchTo(to, true);
+    }
+
+    public Container switchTo(Container to, boolean disposePrevious) {
+        if (getContainersStack().isEmpty()) {
+            return switchFrom(null).to(to, disposePrevious, true);
+        }
+        return switchFrom(getContainersStack().peek()).to(to, disposePrevious, true);
+    }
+
+    private Stack<Container> getContainersStack() {
+        if (stack == null) {
+            stack = new Stack<>();
+        }
+        return stack;
     }
 
     public class ContainerSwitcherSource {
@@ -34,13 +75,27 @@ public class ContainerSwitcher {
         }
 
         public Container to(Container to) {
-            return to(to, true);
+            return to(to, true, true);
         }
 
-        public Container to(Container to, boolean disposePrevious) {
+        public Container to(Container to, boolean disposePrevious, boolean saveToStack) {
+
+            if (source == to) {
+                return to;
+            }
+
+            if (saveToStack) {
+                getContainersStack().push(to);
+            }
+
+            View toShowView = to.getContainingView();
+
+            if (source == null) {
+                containerManager.getActivity().setContentView(toShowView);
+                return to;
+            }
 
             View showingView = source.getContainingView();
-            View toShowView = to.getContainingView();
             ViewParent showingViewParent = showingView.getParent();
 
             to.onBeforeAttach();
@@ -64,5 +119,6 @@ public class ContainerSwitcher {
 
             return to;
         }
+
     }
 }

@@ -4,46 +4,69 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import ng.jifudaily.support.container.Container;
 import ng.jifudaily.support.container.ContainerCallback;
+import ng.jifudaily.support.net.entity.LatestNewsEntity;
+import ng.jifudaily.support.net.entity.StoryEntity;
 import ng.jifudaily.support.util.SubscriberAdapter;
 import ng.jifudaily.view.base.ContainerActivity;
+import ng.jifudaily.view.container.LatestNewsContainer;
+import ng.jifudaily.view.container.NewsContentContainer;
 
 public class MainActivity extends ContainerActivity {
 
     public static final int LATEST_NEWS_CONTAINER = 1;
-    public static final int NEWS_CONTENT_CONTAINER = 1;
+    public static final int NEWS_CONTENT_CONTAINER = 2;
+
+    private LatestNewsContainer latestNewsContainer;
+    private NewsContentContainer newsContentContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.container_latest_news);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
-        setSupportActionBar(toolbar);
+//        setContentView(R.layout.container_latest_news);
 
+        List<StoryEntity> holders = new ArrayList<>();
+        StoryEntity holder = new StoryEntity();
+        holders.add(holder);
+        holders.add(holder);
+        holders.add(holder);
+        holders.add(holder);
+        holders.add(holder);
+        holders.add(holder);
+        holders.add(holder);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
+        latestNewsContainer = createContainer(LatestNewsContainer.class)
+                .id(LATEST_NEWS_CONTAINER)
+                .bind(R.layout.container_latest_news, this)
+                .latestNews(holders);
 
+        getContainerManager().show(latestNewsContainer);
 
-        getContainerManager().add(
-                getContainerBuilder()
-                        .bind(findViewById(R.id.main_tv))
-                        .id(LATEST_NEWS_CONTAINER)
-                        .bind(R.layout.container_latest_news, this)
-                        .build(Container.class)
-                        .subscribe(new SubscriberAdapter<ContainerCallback>() {
-                            @Override
-                            public void onNext(ContainerCallback callback) {
-                            }
-                        }));
-
-        getServices().daily().getLatestNews().subscribe(x -> {
-            x.getStories().get(0).getId();
+        getServices().daily().getLatestNews().subscribe(new SubscriberAdapter<LatestNewsEntity>() {
+            @Override
+            public void onNext(LatestNewsEntity entity) {
+                latestNewsContainer.latestNews(entity.getStories());
+            }
         });
+
+        latestNewsContainer.getFlowable()
+                .filter(c -> c.getWhat() == LatestNewsContainer.NEWS_CLICK)
+                .map(c -> (StoryEntity) c.getObj())
+                .subscribe(story -> getContainerManager().getSwitcher().switchTo(getNewsContentContainer().load(story)));
+//                .flatMap(news -> getServices().daily().getNewsContent(news.getId()))
+//                .subscribe(story -> getContainerManager().getSwitcher().switchTo(newsContentContainer.news(story)), error -> getServices().log().error(error.getMessage()));
+
+//
+//        getServices().daily().getLatestNews().subscribe(x -> {
+//            x.getStories().get(0).getId();
+//        });
 
 //        Observable.timer(1000, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe(x -> {
 //            getContainerManager().getSwitcher().switchFrom(c1).to(c2);
@@ -51,8 +74,16 @@ public class MainActivity extends ContainerActivity {
 
     }
 
+    private NewsContentContainer getNewsContentContainer() {
+        if (newsContentContainer == null) {
+            newsContentContainer = createContainer(NewsContentContainer.class)
+                    .id(NEWS_CONTENT_CONTAINER)
+                    .bind(R.layout.container_news_content, this);
+        }
+        return newsContentContainer;
+    }
 
-//    @Override
+    //    @Override
 //    public boolean onCreateOptionsMenu(Menu menu) {
 //        // Inflate the menu; this adds items to the action bar if it is present.
 //        getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -63,7 +94,7 @@ public class MainActivity extends ContainerActivity {
 //    public boolean onOptionsItemSelected(MenuItem item) {
 //        // Handle action bar item clicks here. The action bar will
 //        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent bind in AndroidManifest.xml.
+//        // as you specify a parent manager in AndroidManifest.xml.
 //        int id = item.getItemId();
 //
 //        //noinspection SimplifiableIfStatement

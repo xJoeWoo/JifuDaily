@@ -3,4 +3,13 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="viewHolderBackground">#eeeeee</color>
+
+    <color name="toolbarGradientStart">#55000000</color>
+    <!--<color name="toolbarGradientCenter">#4400000</color>-->
+    <color name="toolbarGradientEnd">@android:color/transparent</color>
+    <color name="collapsingToolbarTextShadow">#111111</color>
+    <color name="collapsingToolbarText">#ffffff</color>
+
 </resources>

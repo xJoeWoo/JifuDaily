@@ -9,58 +9,85 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import org.reactivestreams.Subscriber;
+import com.squareup.picasso.Picasso;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.TimeUnit;
-
+import butterknife.ButterKnife;
 import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.processors.PublishProcessor;
-import io.reactivex.subscribers.DefaultSubscriber;
 import io.reactivex.subscribers.DisposableSubscriber;
 import ng.jifudaily.support.util.Disposable;
 import ng.jifudaily.support.util.LifeCycle;
+import ng.jifudaily.view.base.ContainerActivity;
 
 
 /**
  * Created by Ng on 2017/4/21.
  */
 
-public class Container implements LifeCycle, Disposable {
+public class Container<T extends Container<T>> implements LifeCycle, Disposable {
 
     public static final int DEFAULT_ID = -1;
 
     private View rootView;
-    private int containerId;
+    private int containerId = DEFAULT_ID;
     private boolean visibleToUser = true;
     private PublishProcessor<ContainerCallback> processor;
     private io.reactivex.disposables.Disposable subDisposable;
+    private ContainerManager manager;
+    private boolean shouldDispose = true;
 
-    protected Container(int containerId, View rootView) {
-        this.containerId = containerId;
-        bind(rootView);
+//    protected Container(ContainerManager manager) {
+//        this.manager = manager;
+//    }
+//
+//
+//    public Container() {
+//    }
+
+//    public static <T extends Container<T>> T createInstance(Class<T> clz) {
+//        try {
+//            return clz.newInstance();
+//        } catch (InstantiationException | IllegalAccessException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+
+    private T getThis() {
+        return (T) this;
     }
 
-    public Container bind(View rootView) {
+    public T manager(ContainerManager manager) {
+        this.manager = manager;
+        return getThis();
+    }
+
+    public T bind(@LayoutRes int layoutId, Context context) {
+        bind(LayoutInflater.from(context).inflate(layoutId, null));
+        return getThis();
+    }
+
+    public T bind(View rootView) {
         this.rootView = rootView;
         if (rootView != null) {
             onBind(this.rootView);
         }
-        return this;
+        return getThis();
     }
-//
-//    public Container bind(@LayoutRes int layoutId, Context context) {
-//        bind(LayoutInflater.from(context).inflate(layoutId, null));
-//        return this;
-//    }
 
-
-    public Container id(int id) {
+    public T id(int id) {
         containerId = id;
-        return this;
+        return getThis();
+    }
+
+    public T subscribe(DisposableSubscriber<ContainerCallback> subscriber) {
+        subDisposable = getProcessor().subscribeWith(subscriber);
+        return getThis();
+    }
+
+    public T shouldDispose(boolean dispose) {
+        shouldDispose = dispose;
+        return getThis();
     }
 
     public Flowable<ContainerCallback> getFlowable() {
@@ -74,9 +101,16 @@ public class Container implements LifeCycle, Disposable {
         return processor;
     }
 
-    public Container subscribe(DisposableSubscriber<ContainerCallback> subscriber) {
-        subDisposable = getProcessor().subscribeWith(subscriber);
-        return this;
+    protected ContainerManager getManager() {
+        return manager;
+    }
+
+    protected ContainerActivity getActivity() {
+        return manager.getActivity();
+    }
+
+    protected Picasso getPicasso() {
+        return getActivity().getServices().net().picasso();
     }
 
     public View getContainingView() {
@@ -87,7 +121,14 @@ public class Container implements LifeCycle, Disposable {
         return containerId;
     }
 
+
+    /**
+     * View call <tt>ButterKnife#manager</tt> to inject views
+     *
+     * @return
+     */
     protected void onBind(View v) {
+        ButterKnife.bind(this, v);
     }
 
     protected void publish(int what) {
@@ -96,10 +137,6 @@ public class Container implements LifeCycle, Disposable {
 
     protected void publish(int what, Object obj) {
         getProcessor().onNext(new ContainerCallback(what, obj));
-    }
-
-    protected void publish(Object obj) {
-        publish(ContainerCallback.DEFAULT_WHAT, obj);
     }
 
     public void onVisibleToUser(boolean isVisible) {
@@ -166,8 +203,8 @@ public class Container implements LifeCycle, Disposable {
     }
 
     @Override
-    public void onBackPressed() {
-
+    public boolean onBackPressed() {
+        return false;
     }
 
     protected final <E extends View> E view(@IdRes int id) {
@@ -181,9 +218,11 @@ public class Container implements LifeCycle, Disposable {
 
     @Override
     public void dispose() {
+        if (!shouldDispose) {
+            return;
+        }
         if (subDisposable != null) {
             subDisposable.dispose();
-
         }
         if (processor != null) {
             processor.onComplete();
@@ -193,47 +232,58 @@ public class Container implements LifeCycle, Disposable {
     }
 
 
-    public static class Builder {
-
-        private int containerId = DEFAULT_ID;
-        private View view;
-
-        public Builder() {
-        }
-
-        public Builder id(int id) {
-            containerId = id;
-            return this;
-        }
-
-        public Builder bind(View view) {
-            this.view = view;
-            return this;
-        }
-
-        public Builder bind(@LayoutRes int layoutId, Context context) {
-            this.view = LayoutInflater.from(context).inflate(layoutId, null);
-            return this;
-        }
-
-        public Builder reset() {
-            containerId = DEFAULT_ID;
-            view = null;
-            return this;
-        }
-
-        public <T extends Container> T build(Class<T> clz) {
-            if (view == null) {
-                throw new IllegalArgumentException("Need rootView to bind a container");
-            }
-            try {
-                Constructor<T> constructor = clz.getConstructor(int.class, View.class);
-                constructor.setAccessible(true);
-                return constructor.newInstance(containerId, view);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
+//    public static class Builder {
+//
+//        private int containerId = DEFAULT_ID;
+//        private View view;
+//
+//        private ContainerManager manager;
+//
+//        public Builder() {
+//        }
+//
+//        public Builder id(int id) {
+//            containerId = id;
+//            return getThis();
+//        }
+//
+//        public Builder bind(View view) {
+//            this.view = view;
+//            return getThis();
+//        }
+//
+//        public Builder manager(ContainerManager manager) {
+//            this.manager = manager;
+//            return getThis();
+//        }
+//
+//        public Builder bind(@LayoutRes int layoutId, Context context) {
+//            this.view = LayoutInflater.from(context).inflate(layoutId, null);
+//            return getThis();
+//        }
+//
+//
+//        public Builder reset() {
+//            containerId = DEFAULT_ID;
+//            view = null;
+//            return getThis();
+//        }
+//
+//        public <T extends Container> T build(Class<T> clz) {
+//            if (view == null) {
+//                throw new IllegalArgumentException("Need View to create a Container");
+//            }
+//            if (manager == null) {
+//                throw new IllegalArgumentException("Need ContainerManager to create Container");
+//            }
+//            try {
+//                Constructor<T> constructor = clz.getConstructor(ContainerManager.class);
+//                constructor.setAccessible(true);
+//                return (T) constructor.newInstance(manager).id(containerId).bind(view);
+//            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+//                e.printStackTrace();
+//            }
+//            return null;
+//        }
+//    }
 }

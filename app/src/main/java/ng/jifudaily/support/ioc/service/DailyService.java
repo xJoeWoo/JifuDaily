@@ -1,6 +1,7 @@
 package ng.jifudaily.support.ioc.service;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import javax.inject.Inject;
 
@@ -32,11 +33,29 @@ public class DailyService {
     }
 
     public Flowable<NewsContentEntity> getNewsContent(int id) {
-        return init(newsService().newsContent(id));
+
+        return init(newsService().newsContent(id)).map(news -> {
+            StringBuilder sb = new StringBuilder("<!DOCTYPE html> <html> <head>\n");
+            for (String js :
+                    news.getJsUrls()) {
+                sb.append("<script src=\"").append(js).append("\"></script>\n");
+            }
+            for (String css :
+                    news.getCssUrls()) {
+                sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"").append(css).append("\">");
+            }
+            sb.append("</head>");
+            sb.append("<body>").append(news.getContentBody()).append("</body>").append("</html>");
+
+            news.setCompleteHTML(sb.toString());
+            Log.e("ads", news.getCompleteHTML());
+            return news;
+        });
+
     }
 
     private <T> T service(String baseUrl, Class<T> service) {
-        return netService.Create(baseUrl, service);
+        return netService.create(baseUrl, service);
     }
 
     private DailyNewsResource newsService() {

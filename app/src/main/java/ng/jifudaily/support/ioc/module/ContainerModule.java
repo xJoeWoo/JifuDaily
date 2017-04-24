@@ -23,11 +23,6 @@ public class ContainerModule {
     }
 
     @Provides
-    public Container.Builder providesContainerBuilder() {
-        return new Container.Builder();
-    }
-
-    @Provides
     public ContainerSwitcher providesContainerSwitcher() {
         return new ContainerSwitcher();
     }

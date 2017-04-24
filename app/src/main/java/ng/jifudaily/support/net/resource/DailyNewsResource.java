@@ -4,6 +4,7 @@ import io.reactivex.Flowable;
 import ng.jifudaily.support.net.entity.NewsContentEntity;
 import ng.jifudaily.support.net.entity.LatestNewsEntity;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.Path;
 
 /**

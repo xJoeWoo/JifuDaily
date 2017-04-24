@@ -1,5 +1,7 @@
 package ng.jifudaily.support.ioc.module;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
@@ -8,7 +10,8 @@ import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import ng.jifudaily.support.ioc.conf.NetConf;
-import ng.jifudaily.support.ioc.log.LogService;
+import ng.jifudaily.support.ioc.service.AnimService;
+import ng.jifudaily.support.ioc.service.LogService;
 import ng.jifudaily.support.ioc.service.DailyService;
 import ng.jifudaily.support.ioc.service.NetService;
 import ng.jifudaily.support.ioc.service.ServiceCollection;
@@ -21,39 +24,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * Created by Ng on 2017/4/20.
  */
-@Module
+@Module(includes = {NetModule.class})
 public class ServiceModule {
-    @Provides
-    @Singleton
-    public OkHttpClient providesOkHttpClient(NetConf conf) {
-        OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        httpClientBuilder.addInterceptor(loggingInterceptor);
-        httpClientBuilder.connectTimeout(conf.getNetTimeout(), TimeUnit.MILLISECONDS);
-        return httpClientBuilder.build();
-    }
-
-//    @Provides
-//    @Singleton
-//    public Gson providesGson() {
-//        return new GsonBuilder().create();
-//    }
-//
 
     @Provides
     @Singleton
-    public Retrofit.Builder providesRetrofitBuilder(OkHttpClient client) {
-        return new Retrofit.Builder()
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
-    }
-
-    @Provides
-    @Singleton
-    public NetService providesNetService(Retrofit.Builder retrofitBuilder) {
-        return new NetService(retrofitBuilder);
+    public NetService providesNetService(Lazy<Retrofit.Builder> retrofitBuilder, Lazy<Picasso> picasso) {
+        return new NetService(retrofitBuilder, picasso);
     }
 
     @Provides

@@ -3,7 +3,6 @@ package ng.jifudaily.support.ioc.service;
 import javax.inject.Inject;
 
 import dagger.Lazy;
-import ng.jifudaily.support.ioc.log.LogService;
 
 /**
  * Created by Ng on 2017/4/20.

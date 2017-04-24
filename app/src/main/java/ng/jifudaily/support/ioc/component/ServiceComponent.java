@@ -5,6 +5,7 @@ import android.app.Activity;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import ng.jifudaily.support.container.Container;
 import ng.jifudaily.support.ioc.module.AppModule;
 import ng.jifudaily.support.ioc.module.ServiceModule;
 
