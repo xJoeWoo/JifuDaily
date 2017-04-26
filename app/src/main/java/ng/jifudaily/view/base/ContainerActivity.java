@@ -4,19 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import android.view.MotionEvent;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import dagger.Lazy;
 import ng.jifudaily.support.container.Container;
 import ng.jifudaily.support.container.ContainerManager;
-import ng.jifudaily.support.container.ContainerSwitcher;
-import ng.jifudaily.support.ioc.service.ServiceCollection;
-import ng.jifudaily.view.container.LatestNewsContainer;
 
 /**
  * Created by Ng on 2017/4/21.
@@ -31,6 +25,7 @@ public class ContainerActivity extends BaseActivity {
 
 //    @Inject
 //    Provider<Container> containerProvider;
+private MotionEvent motionEvent;
 
     //
 //    public ContainerActivity() {
@@ -63,8 +58,14 @@ public class ContainerActivity extends BaseActivity {
 //        return null;
     }
 
-    protected ContainerSwitcher getContainerSwitcher() {
-        return getContainerManager().getSwitcher();
+    public MotionEvent getLatestMotion() {
+        return motionEvent;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        this.motionEvent = ev;
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override

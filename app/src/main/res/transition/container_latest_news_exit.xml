@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+    <fade
+        android:duration="400"
+        android:fadingMode="fade_out">
+        <targets>
+            <target android:targetId="@+id/container_latest_news_root" />
+        </targets>
+    </fade>
+</transitionSet>

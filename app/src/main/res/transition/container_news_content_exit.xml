@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--<slide-->
+    <!--android:duration="@dimen/anim_default_duration"-->
+    <!--android:slideEdge="top"-->
+    <!--android:startDelay="170">-->
+    <!--<targets>-->
+    <!--<target android:targetId="@+id/toolbar_iv2" />-->
+    <!--</targets>-->
+    <!--</slide>-->
+
+
+    <slide
+        android:duration="@dimen/anim_default_duration"
+        android:interpolator="@android:interpolator/accelerate_cubic"
+        android:slideEdge="top">
+        <targets>
+            <target android:targetId="@+id/container_news_content_toolbar_iv2" />
+            <target android:targetId="@+id/container_news_content_toolbar" />
+        </targets>
+    </slide>
+
+    <slide
+        android:duration="@dimen/anim_default_duration"
+        android:interpolator="@android:interpolator/accelerate_cubic"
+        android:slideEdge="top"
+        android:startDelay="@dimen/anim_default_delayh">
+        <targets>
+            <target android:targetId="@+id/container_news_content_tv" />
+        </targets>
+    </slide>
+
+    <!--<fade-->
+    <!--android:duration="200"-->
+    <!--android:fadingMode="fade_out">-->
+    <!--<targets>-->
+    <!--<target android:targetId="@+id/container_news_content_root" />-->
+    <!--</targets>-->
+    <!--</fade>-->
+
+    <slide
+        android:duration="@dimen/anim_default_duration"
+        android:interpolator="@android:interpolator/accelerate_cubic"
+        android:slideEdge="bottom">
+        <targets>
+            <target android:targetId="@+id/container_news_content_wrapper" />
+            <!--<target android:targetId="@+id/container_news_content_wv" />-->
+        </targets>
+    </slide>
+
+
+</transitionSet>

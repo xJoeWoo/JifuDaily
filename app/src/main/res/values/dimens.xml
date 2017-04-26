@@ -1,3 +1,8 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <item name="anim_default_duration" format="string" type="dimen">350</item>
+    <item name="anim_default_delayh" format="string" type="dimen">95</item>
+    <item name="anim_default_delay" format="string" type="dimen">130</item>
+    <item name="anim_default_delay2" format="string" type="dimen">260</item>
+    <item name="anim_default_delay3" format="string" type="dimen">390</item>
 </resources>

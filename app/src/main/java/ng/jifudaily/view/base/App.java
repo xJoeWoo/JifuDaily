@@ -6,10 +6,8 @@ import ng.jifudaily.support.ioc.component.ActivityComponent;
 import ng.jifudaily.support.ioc.component.ContainerComponent;
 import ng.jifudaily.support.ioc.component.DaggerActivityComponent;
 import ng.jifudaily.support.ioc.component.DaggerContainerComponent;
-import ng.jifudaily.support.ioc.component.DaggerServiceComponent;
-import ng.jifudaily.support.ioc.component.ServiceComponent;
 import ng.jifudaily.support.ioc.module.AppModule;
-import ng.jifudaily.support.ioc.module.ServiceModule;
+import ng.jifudaily.support.util.DpUtil;
 
 /**
  * Created by Ng on 2017/4/20.
@@ -32,6 +30,7 @@ public class App extends Application {
 
         activityComponent = DaggerActivityComponent.builder().appModule(new AppModule(this)).build();
         containerComponent = DaggerContainerComponent.create();
+        DpUtil.init(getResources().getDisplayMetrics());
     }
 
 //    public ServiceComponent getServiceComponent() {

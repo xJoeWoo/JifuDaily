@@ -2,9 +2,9 @@ package ng.jifudaily.support.container;
 
 import android.support.annotation.Nullable;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -20,12 +20,11 @@ import ng.jifudaily.view.base.ContainerActivity;
 
 public class ContainerManager {
 
-    private ContainerActivity activity;
-    private final List<Container> containers = new ArrayList<>();
-
+    private final Set<Container> containers = new HashSet<>();
     @Inject
     Lazy<ContainerSwitcher> switcherLazy;
-
+    private ContainerActivity activity;
+    private boolean switcherInited = false;
 
     public ContainerManager bind(ContainerActivity act) {
         this.activity = act;
@@ -34,10 +33,7 @@ public class ContainerManager {
     }
 
     public ContainerManager add(Container container) {
-        if (!getContainers().contains(container)) {
-            getContainers().add(container);
-            container.manager(this);
-        }
+        getContainers().add(container.manager(this));
         return this;
     }
 
@@ -53,10 +49,10 @@ public class ContainerManager {
      * @return
      */
     public ContainerManager show(Container container) {
-        getSwitcher().switchTo(container);
+        add(container);
+        getSwitcher().to(container);
         return this;
     }
-
 
     /**
      * Remove all containers that using provided id
@@ -95,7 +91,7 @@ public class ContainerManager {
      */
     @Nullable
     public <T extends Container<T>> T getContainer(int containerId, Class<T> clz) {
-        List<Container> cs = getContainers();
+        Set<Container> cs = getContainers();
         for (Container c : cs) {
             if (c.getContainerId() == containerId) {
                 return clz.cast(c);
@@ -103,8 +99,6 @@ public class ContainerManager {
         }
         return null;
     }
-
-    private boolean switcherInited = false;
 
     public ContainerSwitcher getSwitcher() {
         if (!switcherInited) {
@@ -115,7 +109,7 @@ public class ContainerManager {
         return switcherLazy.get();
     }
 
-    public List<Container> getContainers() {
+    public Set<Container> getContainers() {
         return containers;
     }
 
@@ -124,13 +118,17 @@ public class ContainerManager {
     }
 
     public void callContainers(final Action<Container> callback) {
-        containers.forEach(callback::onCall);
+//        containers.forEach(x->callback.onCall(x));
+        for (Container c :
+                containers) {
+            callback.onCall(c);
+        }
     }
 
     public boolean onBackPressed() {
         for (Container c :
                 containers) {
-            if (c.onBackPressed()) {
+            if (c.isAttached() && c.onBackPressed()) {
                 return true;
             }
         }

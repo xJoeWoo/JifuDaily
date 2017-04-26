@@ -11,7 +11,6 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import ng.jifudaily.support.ioc.conf.NetConf;
-import ng.jifudaily.support.ioc.service.AnimService;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;

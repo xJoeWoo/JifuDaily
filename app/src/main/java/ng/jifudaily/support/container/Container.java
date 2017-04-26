@@ -3,28 +3,26 @@ package ng.jifudaily.support.container;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
-import android.util.Log;
+import android.transition.Transition;
 import android.view.LayoutInflater;
 import android.view.View;
-
-import com.squareup.picasso.Picasso;
+import android.view.ViewTreeObserver;
 
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import io.reactivex.Flowable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.processors.PublishProcessor;
-import io.reactivex.subscribers.DisposableSubscriber;
-import ng.jifudaily.support.util.Disposable;
+import ng.jifudaily.support.ioc.service.ServiceCollection;
 import ng.jifudaily.support.util.LifeCycle;
-import ng.jifudaily.view.base.ContainerActivity;
 
 
 /**
  * Created by Ng on 2017/4/21.
  */
 
-public class Container<T extends Container<T>> implements LifeCycle, Disposable {
+public abstract class Container<T extends Container<T>> implements LifeCycle, Disposable {
 
     public static final int DEFAULT_ID = -1;
 
@@ -32,9 +30,13 @@ public class Container<T extends Container<T>> implements LifeCycle, Disposable 
     private int containerId = DEFAULT_ID;
     private boolean visibleToUser = true;
     private PublishProcessor<ContainerCallback> processor;
-    private io.reactivex.disposables.Disposable subDisposable;
     private ContainerManager manager;
     private boolean shouldDispose = true;
+    private boolean isAttached = false;
+    private int layoutId = -1;
+    private Context context;
+    private boolean requestNewView = false;
+    private Unbinder unbinder;
 
 //    protected Container(ContainerManager manager) {
 //        this.manager = manager;
@@ -52,6 +54,7 @@ public class Container<T extends Container<T>> implements LifeCycle, Disposable 
 //        }
 //        return null;
 //    }
+private boolean disposed = false;
 
     private T getThis() {
         return (T) this;
@@ -62,16 +65,19 @@ public class Container<T extends Container<T>> implements LifeCycle, Disposable 
         return getThis();
     }
 
-    public T bind(@LayoutRes int layoutId, Context context) {
-        bind(LayoutInflater.from(context).inflate(layoutId, null));
-        return getThis();
-    }
 
-    public T bind(View rootView) {
-        this.rootView = rootView;
-        if (rootView != null) {
-            onBind(this.rootView);
-        }
+//    public T bind(View rootView) {
+//        this.rootView = rootView;
+//        if (rootView != null) {
+//            onViewCreated(this.rootView);
+//        }
+//        return getThis();
+//    }
+
+    public T bind(@LayoutRes int layoutId, Context context) {
+        this.layoutId = layoutId;
+        this.context = context;
+        onBind();
         return getThis();
     }
 
@@ -80,14 +86,34 @@ public class Container<T extends Container<T>> implements LifeCycle, Disposable 
         return getThis();
     }
 
-    public T subscribe(DisposableSubscriber<ContainerCallback> subscriber) {
-        subDisposable = getProcessor().subscribeWith(subscriber);
+    protected T setShouldDispose(boolean dispose) {
+        shouldDispose = dispose;
         return getThis();
     }
 
-    public T shouldDispose(boolean dispose) {
-        shouldDispose = dispose;
+    protected boolean shouldDispose() {
+        return shouldDispose;
+    }
+
+    public boolean isRequestNewView() {
+        return requestNewView;
+    }
+
+    protected T setRequestNewView(boolean requestNewView) {
+        this.requestNewView = requestNewView;
         return getThis();
+    }
+
+    public Transition getEnterTransition() {
+        return null;
+    }
+
+    public Transition getExitTransition() {
+        return null;
+    }
+
+    public Transition getReenterTransition() {
+        return null;
     }
 
     public Flowable<ContainerCallback> getFlowable() {
@@ -105,30 +131,58 @@ public class Container<T extends Container<T>> implements LifeCycle, Disposable 
         return manager;
     }
 
-    protected ContainerActivity getActivity() {
-        return manager.getActivity();
+    public boolean isAttached() {
+        return isAttached;
     }
 
-    protected Picasso getPicasso() {
-        return getActivity().getServices().net().picasso();
+    public Container setAttached(boolean attached) {
+        isAttached = attached;
+        return this;
+    }
+
+    protected ServiceCollection getServices() {
+        return getManager().getActivity().getServices();
+    }
+
+    public View createContainingView() {
+        rootView = LayoutInflater.from(getContext()).inflate(getBindLayoutId(), null);
+        rootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                onViewDrawn(rootView);
+                rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
+        onViewCreated(rootView);
+        return rootView;
+    }
+
+    protected void onViewDrawn(View v) {
     }
 
     public View getContainingView() {
-        return rootView;
+        return rootView == null ? createContainingView() : rootView;
     }
 
     public int getContainerId() {
         return containerId;
     }
 
+    public int getBindLayoutId() {
+        return layoutId;
+    }
+
+    protected Context getContext() {
+        return context;
+    }
 
     /**
      * View call <tt>ButterKnife#manager</tt> to inject views
      *
      * @return
      */
-    protected void onBind(View v) {
-        ButterKnife.bind(this, v);
+    protected void onViewCreated(View v) {
+        unbinder = ButterKnife.bind(this, v);
     }
 
     protected void publish(int what) {
@@ -137,6 +191,10 @@ public class Container<T extends Container<T>> implements LifeCycle, Disposable 
 
     protected void publish(int what, Object obj) {
         getProcessor().onNext(new ContainerCallback(what, obj));
+    }
+
+    protected void onBind() {
+        createContainingView();
     }
 
     public void onVisibleToUser(boolean isVisible) {
@@ -149,6 +207,12 @@ public class Container<T extends Container<T>> implements LifeCycle, Disposable 
     public void onAttached() {
     }
 
+    public void onBeforeDetach() {
+    }
+
+    /**
+     * Don't set view states for next attach, switching between will clear those settings
+     */
     public void onDetached() {
     }
 
@@ -207,28 +271,26 @@ public class Container<T extends Container<T>> implements LifeCycle, Disposable 
         return false;
     }
 
-    protected final <E extends View> E view(@IdRes int id) {
-        try {
-            return (E) rootView.findViewById(id);
-        } catch (ClassCastException ex) {
-            Log.e("UiBlock", "Could not cast View to concrete class.", ex);
-            throw ex;
-        }
-    }
-
     @Override
     public void dispose() {
-        if (!shouldDispose) {
-            return;
-        }
-        if (subDisposable != null) {
-            subDisposable.dispose();
-        }
         if (processor != null) {
             processor.onComplete();
             processor = null;
         }
+        disposeView();
+        disposed = true;
+    }
+
+    public void disposeView() {
         rootView.setVisibility(View.GONE);
+        if (unbinder != null) {
+            unbinder.unbind();
+        }
+    }
+
+    @Override
+    public boolean isDisposed() {
+        return disposed;
     }
 
 

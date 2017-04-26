@@ -1,18 +1,10 @@
 package ng.jifudaily.view.adapter;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.graphics.Color;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -21,10 +13,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
-import io.reactivex.subjects.PublishSubject;
+import io.reactivex.disposables.Disposable;
 import ng.jifudaily.R;
-import ng.jifudaily.support.ioc.service.AnimService;
 import ng.jifudaily.support.net.entity.StoryEntity;
 import ng.jifudaily.support.util.CircleTransform;
 import ng.jifudaily.support.util.ObservableRecyclerViewAdapter;
@@ -35,14 +25,15 @@ import ng.jifudaily.view.base.SquareImageView;
  * Created by Ng on 2017/4/23.
  */
 
-public class LatestNewsAdapter extends ObservableRecyclerViewAdapter<LatestNewsAdapter.LatestNewsViewHolder> {
+public class LatestNewsAdapter extends ObservableRecyclerViewAdapter<LatestNewsAdapter.LatestNewsViewHolder, StoryEntity> {
 
     private final LayoutInflater layoutInflater;
     private final Context context;
-    private List<StoryEntity> latestNews;
     private CircleTransform circleTransform = new CircleTransform();
     private ViewHolderClickListener onClickListener = (v, pos) -> publish(pos);
     private Picasso picasso;
+    private Disposable sub;
+    private List<StoryEntity> latestNews;
 
     public LatestNewsAdapter(Context context, Picasso picasso) {
         this.context = context;
@@ -50,10 +41,44 @@ public class LatestNewsAdapter extends ObservableRecyclerViewAdapter<LatestNewsA
         this.picasso = picasso;
     }
 
-    public LatestNewsAdapter latestNews(List<StoryEntity> latestNews) {
-        this.latestNews = latestNews;
+    public LatestNewsAdapter latestNews(List<StoryEntity> entities) {
+        if (latestNews == null) {
+            updateRange(0, entities);
+        } else {
+            if (entities.size() > latestNews.size()) {
+                int end = entities.size() - latestNews.size();
+                addRange(0, entities.subList(0, end));
+            } else if (entities.size() < latestNews.size()) {
+                replace(entities);
+            }
+        }
+        latestNews = entities;
         return this;
     }
+
+    public LatestNewsAdapter anim() {
+        List<StoryEntity> data = getData();
+        clear();
+        addRange(0, data);
+        return this;
+    }
+
+//    public LatestNewsAdapter anim() {
+//        if (sub != null) {
+//            sub.dispose();
+//            sub = null;
+//        }
+//        sub = Observable.intervalRange(0,
+//                latestNews.size(),
+//                0,
+//                AnimUtil.DEFAULT_DURATION,
+//                TimeUnit.MILLISECONDS)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(x -> {
+//                    notifyItemChanged(x.intValue());
+//                });
+//        return this;
+//    }
 
     @Override
     public LatestNewsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -62,53 +87,44 @@ public class LatestNewsAdapter extends ObservableRecyclerViewAdapter<LatestNewsA
 
     @Override
     public void onBindViewHolder(LatestNewsViewHolder holder, int position) {
-        StoryEntity e = latestNews.get(position);
+
+        StoryEntity e = getData().get(position);
+
+        holder.getTv().setText(e.getTitle());
+
         if (e.getId() == StoryEntity.INVALID) {
             return;
         }
 
-        if (holder.getHolder().getVisibility() != View.GONE) {
-            AnimService.FadeOut(holder.getHolder(), 300, new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    holder.getHolder().setVisibility(View.GONE);
-                }
-            });
+        if (e.getImages() != null && e.getImages().size() > 0) {
+            picasso.load(e.getImages().get(0))
+                    .error(R.drawable.ic_imageholder)
+                    .placeholder(R.drawable.ic_imageholder)
+                    .transform(circleTransform)
+                    .into(holder.getIv());
         }
-        holder.getTv().setText(e.getTitle());
-        picasso.load(latestNews.get(position).getImages().get(0))
-                .error(R.drawable.ic_imageholder)
-                .placeholder(R.drawable.ic_imageholder)
-                .transform(circleTransform)
-                .into(holder.getIv());
+
     }
 
-    @Override
-    public int getItemCount() {
-        return latestNews == null ? 0 : latestNews.size();
-    }
 
     static class LatestNewsViewHolder extends RecyclerView.ViewHolder {
+
 
         @BindView(R.id.item_latest_news_iv)
         SquareImageView iv;
 
-        @BindView(R.id.item_latest_news_tv)
+        @BindView(R.id.item_latest_news_holder)
         TextView tv;
 
-        @BindView(R.id.item_latest_news_tv_holder)
-        View holder;
+
+        @BindView(R.id.item_latest_news_scene_container)
+        ViewGroup rootView;
 
         LatestNewsViewHolder(View view, ViewHolderClickListener listener) {
             super(view);
             ButterKnife.bind(this, view);
             view.setOnClickListener(v ->
                     listener.onClick(v, getAdapterPosition()));
-        }
-
-        public View getHolder() {
-            return holder;
         }
 
         public SquareImageView getIv() {
@@ -118,6 +134,8 @@ public class LatestNewsAdapter extends ObservableRecyclerViewAdapter<LatestNewsA
         public TextView getTv() {
             return tv;
         }
+
+
     }
 
 }

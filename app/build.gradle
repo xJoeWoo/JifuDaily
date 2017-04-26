@@ -52,6 +52,7 @@ android {
 
         debug {
             minifyEnabled false
+            testCoverageEnabled false
         }
     }
 }
@@ -84,4 +85,5 @@ dependencies {
     compile 'com.android.support:support-compat:25.3.0'
     compile 'com.daimajia.easing:library:2.0@aar'
     compile 'com.daimajia.androidanimations:library:2.2@aar'
+    compile 'jp.wasabeef:recyclerview-animators:2.2.6'
 }

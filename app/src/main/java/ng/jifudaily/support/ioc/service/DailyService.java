@@ -1,7 +1,6 @@
 package ng.jifudaily.support.ioc.service;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import javax.inject.Inject;
 
@@ -48,7 +47,6 @@ public class DailyService {
             sb.append("<body>").append(news.getContentBody()).append("</body>").append("</html>");
 
             news.setCompleteHTML(sb.toString());
-            Log.e("ads", news.getCompleteHTML());
             return news;
         });
 
