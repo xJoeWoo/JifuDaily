@@ -30,6 +30,8 @@ public class NetModule {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         httpClientBuilder.addInterceptor(loggingInterceptor);
+        httpClientBuilder.readTimeout(conf.getNetTimeout(), TimeUnit.MILLISECONDS);
+        httpClientBuilder.writeTimeout(conf.getNetTimeout(), TimeUnit.MILLISECONDS);
         httpClientBuilder.connectTimeout(conf.getNetTimeout(), TimeUnit.MILLISECONDS);
         return httpClientBuilder.build();
     }
@@ -52,7 +54,7 @@ public class NetModule {
 
     @Provides
     @Singleton
-    public Picasso providesPicasso(OkHttpClient client, Application app) {
+    public Picasso providesPicasso(Application app) {
         return new Picasso.Builder(app).build();
     }
 

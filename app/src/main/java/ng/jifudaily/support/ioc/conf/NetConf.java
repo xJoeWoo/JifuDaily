@@ -5,7 +5,7 @@ package ng.jifudaily.support.ioc.conf;
  */
 
 public class NetConf {
-    private final int TIMEOUT = 10000;
+    private final int TIMEOUT = 5000;
 
     private final String BASE_URL = "http://news-at.zhihu.com/api/4";
 

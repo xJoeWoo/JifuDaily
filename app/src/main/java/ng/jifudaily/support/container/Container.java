@@ -1,6 +1,5 @@
 package ng.jifudaily.support.container;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
@@ -16,6 +15,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.processors.PublishProcessor;
 import ng.jifudaily.support.ioc.service.ServiceCollection;
 import ng.jifudaily.support.util.LifeCycle;
+import ng.jifudaily.view.base.ContainerActivity;
 
 
 /**
@@ -26,7 +26,7 @@ public abstract class Container<T extends Container<T>> implements LifeCycle, Di
 
     public static final int DEFAULT_ID = -1;
 
-    private View rootView;
+    private View containingView;
     private int containerId = DEFAULT_ID;
     private boolean visibleToUser = true;
     private PublishProcessor<ContainerCallback> processor;
@@ -34,27 +34,9 @@ public abstract class Container<T extends Container<T>> implements LifeCycle, Di
     private boolean shouldDispose = true;
     private boolean isAttached = false;
     private int layoutId = -1;
-    private Context context;
     private boolean requestNewView = false;
     private Unbinder unbinder;
-
-//    protected Container(ContainerManager manager) {
-//        this.manager = manager;
-//    }
-//
-//
-//    public Container() {
-//    }
-
-//    public static <T extends Container<T>> T createInstance(Class<T> clz) {
-//        try {
-//            return clz.newInstance();
-//        } catch (InstantiationException | IllegalAccessException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
-private boolean disposed = false;
+    private boolean disposed = false;
 
     private T getThis() {
         return (T) this;
@@ -66,17 +48,8 @@ private boolean disposed = false;
     }
 
 
-//    public T bind(View rootView) {
-//        this.rootView = rootView;
-//        if (rootView != null) {
-//            onViewCreated(this.rootView);
-//        }
-//        return getThis();
-//    }
-
-    public T bind(@LayoutRes int layoutId, Context context) {
+    public T bind(@LayoutRes int layoutId) {
         this.layoutId = layoutId;
-        this.context = context;
         onBind();
         return getThis();
     }
@@ -127,6 +100,14 @@ private boolean disposed = false;
         return processor;
     }
 
+    protected void publish(int what) {
+        publish(what, null);
+    }
+
+    protected void publish(int what, Object obj) {
+        getProcessor().onNext(new ContainerCallback(what, obj));
+    }
+
     protected ContainerManager getManager() {
         return manager;
     }
@@ -141,27 +122,28 @@ private boolean disposed = false;
     }
 
     protected ServiceCollection getServices() {
-        return getManager().getActivity().getServices();
+        return getActivity().getServices();
+    }
+
+    protected ContainerActivity getActivity() {
+        return getManager().getActivity();
     }
 
     public View createContainingView() {
-        rootView = LayoutInflater.from(getContext()).inflate(getBindLayoutId(), null);
-        rootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        containingView = LayoutInflater.from(getManager().getActivity()).inflate(getBindLayoutId(), null);
+        containingView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                onViewDrawn(rootView);
-                rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                onViewDrawn(containingView);
+                containingView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
-        onViewCreated(rootView);
-        return rootView;
-    }
-
-    protected void onViewDrawn(View v) {
+        onViewCreated(containingView);
+        return containingView;
     }
 
     public View getContainingView() {
-        return rootView == null ? createContainingView() : rootView;
+        return containingView == null ? createContainingView() : containingView;
     }
 
     public int getContainerId() {
@@ -172,25 +154,15 @@ private boolean disposed = false;
         return layoutId;
     }
 
-    protected Context getContext() {
-        return context;
+
+    protected void onViewDrawn(View v) {
     }
 
     /**
      * View call <tt>ButterKnife#manager</tt> to inject views
-     *
-     * @return
      */
     protected void onViewCreated(View v) {
         unbinder = ButterKnife.bind(this, v);
-    }
-
-    protected void publish(int what) {
-        publish(what, null);
-    }
-
-    protected void publish(int what, Object obj) {
-        getProcessor().onNext(new ContainerCallback(what, obj));
     }
 
     protected void onBind() {
@@ -211,7 +183,7 @@ private boolean disposed = false;
     }
 
     /**
-     * Don't set view states for next attach, switching between will clear those settings
+     * Don't set view states for next attach, switching between may clear those settings
      */
     public void onDetached() {
     }
@@ -281,8 +253,8 @@ private boolean disposed = false;
         disposed = true;
     }
 
+    // Only this method is called when switch
     public void disposeView() {
-        rootView.setVisibility(View.GONE);
         if (unbinder != null) {
             unbinder.unbind();
         }
@@ -292,60 +264,4 @@ private boolean disposed = false;
     public boolean isDisposed() {
         return disposed;
     }
-
-
-//    public static class Builder {
-//
-//        private int containerId = DEFAULT_ID;
-//        private View view;
-//
-//        private ContainerManager manager;
-//
-//        public Builder() {
-//        }
-//
-//        public Builder id(int id) {
-//            containerId = id;
-//            return getThis();
-//        }
-//
-//        public Builder bind(View view) {
-//            this.view = view;
-//            return getThis();
-//        }
-//
-//        public Builder manager(ContainerManager manager) {
-//            this.manager = manager;
-//            return getThis();
-//        }
-//
-//        public Builder bind(@LayoutRes int layoutId, Context context) {
-//            this.view = LayoutInflater.from(context).inflate(layoutId, null);
-//            return getThis();
-//        }
-//
-//
-//        public Builder reset() {
-//            containerId = DEFAULT_ID;
-//            view = null;
-//            return getThis();
-//        }
-//
-//        public <T extends Container> T build(Class<T> clz) {
-//            if (view == null) {
-//                throw new IllegalArgumentException("Need View to create a Container");
-//            }
-//            if (manager == null) {
-//                throw new IllegalArgumentException("Need ContainerManager to create Container");
-//            }
-//            try {
-//                Constructor<T> constructor = clz.getConstructor(ContainerManager.class);
-//                constructor.setAccessible(true);
-//                return (T) constructor.newInstance(manager).id(containerId).bind(view);
-//            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-//                e.printStackTrace();
-//            }
-//            return null;
-//        }
-//    }
 }

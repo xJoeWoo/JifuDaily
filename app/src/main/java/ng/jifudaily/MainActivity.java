@@ -30,21 +30,20 @@ public class MainActivity extends ContainerActivity {
 
         latestNewsContainer = createContainer(LatestNewsContainer.class)
                 .id(LATEST_NEWS_CONTAINER)
-                .bind(R.layout.container_latest_news, this);
+                .bind(R.layout.container_latest_news);
 
         newsContentContainer = createContainer(NewsContentContainer.class)
                 .id(NEWS_CONTENT_CONTAINER)
-                .bind(R.layout.container_news_content, this);
+                .bind(R.layout.container_news_content);
 
-        getContainerManager().add(newsContentContainer).show(latestNewsContainer.loadLatestNews());
-
+        getContainerManager().show(latestNewsContainer.loadLatestNews());
 
         latestNewsContainer.getFlowable()
                 .filter(c -> c.getWhat() == LatestNewsContainer.NEWS_CLICK)
                 .map(c -> (StoryEntity) c.getObj())
-                .subscribe(story -> getContainerManager().getSwitcher().to(newsContentContainer.load(story)));
-//                .flatMap(news -> getServices().daily().getNewsContent(news.getId()))
-//                .subscribe(story -> getContainerManager().getSwitcher().switchTo(newsContentContainer.news(story)), error -> getServices().log().error(error.getMessage()));
+                .subscribe(story -> getContainerManager().getSwitcher().to(newsContentContainer.init(story)));
+//                .flatMap(processNewsContent -> getServices().daily().getNewsContent(processNewsContent.getId()))
+//                .subscribe(story -> getContainerManager().getSwitcher().switchTo(newsContentContainer.processNewsContent(story)), error -> getServices().log().error(error.getMessage()));
 
 
     }

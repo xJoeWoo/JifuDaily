@@ -47,14 +47,11 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
     @BindView(R.id.container_news_content_toolbar_iv2)
     AppbarImageView iv2;
     @BindView(R.id.container_news_content_tv)
-    TextView tvTitle;
+    TextView tv;
     @BindView(R.id.container_news_content_toolbar)
     Toolbar tb;
     @BindView(R.id.container_news_content_blocker)
     View blocker;
-
-    //    @BindView(R.id.container_news_content_pbi)
-//    ProgressBar pbi;
     @BindView(R.id.container_news_content_blocker_bg)
     View blockerBg;
     @BindView(R.id.container_news_content_pbi_bg)
@@ -115,42 +112,39 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
 
         AppCompatActivity act = getManager().getActivity();
         act.setSupportActionBar(tb);
-        act.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        act.getSupportActionBar().setDisplayShowHomeEnabled(true);
-    }
-
-    @Override
-    protected void onViewDrawn(View v) {
-        super.onViewDrawn(v);
-        appBar.setExpanded(true);
+        if (act.getSupportActionBar() != null) {
+            act.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            act.getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
     }
 
     @Override
     public void onAttached() {
         super.onAttached();
         if (story != null) {
-            tvTitle.setText(story.getTitle());
-            getServices().daily().getNewsContent(story.getId()).subscribe(NewsContentContainer.this::news, error -> {
+            tv.setText(story.getTitle());
+            getServices().daily().getNewsContent(story.getId()).subscribe(NewsContentContainer.this::processNewsContent, error -> {
             });
         }
     }
-
 
     @Override
     public void onDetached() {
         super.onDetached();
         wv.stopLoading();
+        story = null;
+        news = null;
     }
 
     @Override
     public Transition getEnterTransition() {
-        Transition t = TransitionInflater.from(getContext()).inflateTransition(R.transition.container_news_content_enter);
+        Transition t = TransitionInflater.from(getActivity()).inflateTransition(R.transition.container_news_content_enter);
         t.addListener(new TransitionListenerAdapter() {
             @Override
             public void onTransitionStart(Transition transition) {
                 super.onTransitionStart(transition);
                 MotionEvent motionEvent = getManager().getActivity().getLatestMotion();
-                AnimUtil.circularReveal(blocker, (int) motionEvent.getX(), (int) motionEvent.getY(), true, (int) (AnimUtil.DEFAULT_DURATION), new AnimUtil.ObjectArgs().delay(150).end(x -> {
+                AnimUtil.circularReveal(blocker, (int) motionEvent.getX(), (int) motionEvent.getY(), true, AnimUtil.DEFAULT_DURATION, new AnimUtil.ObjectArgs().delay(150).end(x -> {
                     AnimUtil.fadeOut(blockerBg, AnimUtil.DEFAULT_DURATION, new AnimUtil.ObjectArgs().end(xx -> blockerBg.setVisibility(View.GONE)));
                 }));
             }
@@ -166,39 +160,30 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
 
     @Override
     public Transition getExitTransition() {
-        Transition transition = TransitionInflater.from(getContext()).inflateTransition(R.transition.container_news_content_exit);
+        Transition transition = TransitionInflater.from(getActivity()).inflateTransition(R.transition.container_news_content_exit);
         if (appBarLayoutCollapsed) {
             transition.excludeTarget(R.id.container_news_content_tv, true);
         }
         return transition;
     }
 
-    public NewsContentContainer load(StoryEntity story) {
+    public NewsContentContainer init(StoryEntity story) {
         this.story = story;
         return this;
     }
 
-    public NewsContentContainer news(NewsContentEntity news) {
+    private NewsContentContainer processNewsContent(NewsContentEntity news) {
         this.news = news;
         wv.loadData(news.getCompleteHTML(), "text/html; charset=UTF-8", null);
-        getServices().net().picasso().load(this.news.getImageUrl()).noFade().into(iv, FadeInCallback.createInstance(iv));
+        getServices().net().picasso().load(news.getImageUrl()).noFade().into(iv, FadeInCallback.createInstance(iv));
         return this;
     }
 
     @Override
-    public void dispose() {
-        super.dispose();
-        story = null;
-        news = null;
-    }
-
-    @Override
     public boolean onBackPressed() {
-
         if (news != null) {
             positions.put(news.getId(), wrapper.getScrollY());
         }
-
         if (appbarLayoutExpended) {
 
             // imageview in appbar layout will disappear when change scene, so 麻烦
@@ -209,12 +194,10 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
                 iv2.setImageDrawable(iv.getDrawable());
                 iv2.setY(r.top);
             }
-
             if (wrapper.getScrollY() <= DpUtil.dpToPx(200)) {
                 return false;
             }
         }
-
         AnimUtil.object(wrapper, "scrollY", new AnimUtil.ObjectArgs().duration(AnimUtil.DEFAULT_DURATION).interpolator(AnimUtil.DECELERATE_INTERPOLATOR).end(x -> getManager().getSwitcher().back()), wrapper.getScrollY(), 0);
         return true;
     }

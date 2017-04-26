@@ -23,14 +23,8 @@ public class ContainerActivity extends BaseActivity {
 
     private boolean isContainerManagerInited = false;
 
-//    @Inject
-//    Provider<Container> containerProvider;
-private MotionEvent motionEvent;
+    private MotionEvent motionEvent;
 
-    //
-//    public ContainerActivity() {
-//        ((App) getApplication()).getActivityComponent().inject(this);
-//    }
     protected ContainerManager getContainerManager() {
         if (!isContainerManagerInited) {
             containerManager.get().bind(this);
@@ -39,6 +33,13 @@ private MotionEvent motionEvent;
         return containerManager.get();
     }
 
+    /**
+     * Will auto add container to <tt>ContainerManager</tt>
+     *
+     * @param clz
+     * @param <T>
+     * @return
+     */
     protected <T extends Container<T>> T createContainer(Class<T> clz) {
         try {
             T c = clz.newInstance();
@@ -48,14 +49,6 @@ private MotionEvent motionEvent;
             e.printStackTrace();
         }
         return null;
-//        try {
-//            Constructor<T> constructor =  .getConstructor();
-//            constructor.setAccessible(true);
-//            return constructor.newInstance().manager(containerManager);
-//        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
     }
 
     public MotionEvent getLatestMotion() {

@@ -15,7 +15,7 @@ import ng.jifudaily.view.base.ContainerLayout;
  * Created by Ng on 2017/4/21.
  */
 
-public class ContainerSwitcher {
+public final class ContainerSwitcher {
 
     private ContainerManager containerManager;
     private Stack<Container> stack;

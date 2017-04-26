@@ -45,9 +45,7 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
     private List<StoryEntity> latestNews;
     private int titleNewsIndex = 0;
     private boolean usingIv2 = false;
-
     private boolean firstOpen = true;
-
     private Callback.EmptyCallback callback = new Callback.EmptyCallback() {
         @Override
         public void onSuccess() {
@@ -80,10 +78,10 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
     @Override
     protected void onViewCreated(View v) {
         super.onViewCreated(v);
-        latestNewsAdapter = new LatestNewsAdapter(getContext(), getServices().net().picasso());
+        latestNewsAdapter = new LatestNewsAdapter(getActivity(), getServices().net().picasso());
         latestNewsAdapter.getObservable().subscribe(pos -> publishLoadContent((int) pos));
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setItemAnimator(new SlideInLeftAnimator());
         long duration = AnimUtil.DEFAULT_DURATION / 2;
         recyclerView.getItemAnimator().setAddDuration(duration);
@@ -91,7 +89,7 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
         recyclerView.getItemAnimator().setRemoveDuration(duration);
         recyclerView.getItemAnimator().setMoveDuration(duration);
         recyclerView.setAdapter(latestNewsAdapter);
-        refreshLayout.setOnRefreshListener(this::onRefresh);
+        refreshLayout.setOnRefreshListener(this::loadLatestNews);
         refreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary);
     }
 
@@ -111,19 +109,14 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
         publish(NEWS_CLICK, latestNews.get(pos));
     }
 
-    private void onRefresh() {
-
-        loadLatestNews();
-    }
-
     @Override
     public Transition getExitTransition() {
-        return TransitionInflater.from(getContext()).inflateTransition(R.transition.container_latest_news_exit);
+        return TransitionInflater.from(getActivity()).inflateTransition(R.transition.container_latest_news_exit);
     }
 
     @Override
     public Transition getReenterTransition() {
-        return TransitionInflater.from(getContext()).inflateTransition(R.transition.container_latest_news_reenter);
+        return TransitionInflater.from(getActivity()).inflateTransition(R.transition.container_latest_news_reenter);
     }
 
     public LatestNewsContainer loadLatestNews() {
@@ -132,17 +125,6 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
             processLatestNews(entity.getStories());
         }, error -> {
         });
-
-//        if (latestNews == null) {
-//            latestNews = new ArrayList<>();
-//        }
-//
-//        StoryEntity s = new StoryEntity();
-//        s.setId(123);
-//        s.setTitle(String.valueOf(System.currentTimeMillis()));
-//        latestNews.add(0, s);
-//        processLatestNews(latestNews);
-
         return this;
     }
 
@@ -152,9 +134,6 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
         this.latestNews = entities;
         latestNewsAdapter.latestNews(new ArrayList<>(entities));
         recyclerView.smoothScrollToPosition(0);
-//        recyclerView.scrollToPosition(0);
-//        latestNewsAdapter.notifyItemInserted(0);
-//        latestNewsAdapter.notifyItemInserted(1);
         changeTitleImage();
     }
 
@@ -162,24 +141,18 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
         if (latestNews == null || latestNews.size() == 0 || latestNews.get(0).getId() == StoryEntity.INVALID) {
             return;
         }
-
         StoryEntity s = latestNews.get(getRandomTitleNewsIndex());
         if (s.getImages() == null || s.getImages().size() == 0) {
             return;
         }
-
-        getServices().net().picasso().load(s.getImages().get(0))
-                .noFade()
-                .into(usingIv2 ? iv2 : iv, callback);
+        getServices().net().picasso().load(s.getImages().get(0)).noFade().into(usingIv2 ? iv2 : iv, callback);
     }
 
 
     private int getRandomTitleNewsIndex() {
-
         if (latestNews.size() < 2) {
             return 0;
         }
-
         int next = random.nextInt(latestNews.size());
         while (next == titleNewsIndex) {
             next = random.nextInt(latestNews.size());
