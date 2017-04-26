@@ -4,10 +4,10 @@
     <ng.jifudaily.view.base.SquareImageView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/item_latest_news_iv"
-        android:layout_width="128dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_imageholder"
+        android:src="@drawable/ic_image_holder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

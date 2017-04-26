@@ -27,7 +27,7 @@
             <ng.jifudaily.view.base.AppbarImageView
                 android:id="@+id/container_news_content_toolbar_iv"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="@dimen/container_news_content_header_size"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax" />
 
@@ -38,8 +38,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|start"
-                android:layout_margin="16dp"
-                android:textSize="22sp"
+                android:layout_margin="@dimen/container_news_content_header_title_margin"
+                android:textSize="@dimen/container_news_content_header_title_size"
                 app:layout_anchor="@+id/appbar_ly"
                 app:layout_anchorGravity="bottom"
                 app:layout_collapseMode="none" />
@@ -59,7 +59,7 @@
     <ng.jifudaily.view.base.AppbarImageView
         android:id="@+id/container_news_content_toolbar_iv2"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="@dimen/container_news_content_header_size"
         android:scaleType="centerCrop"
         android:visibility="invisible" />
 
@@ -71,28 +71,23 @@
         android:scrollbars="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <FrameLayout
-            android:id="@+id/container_news_content_holder"
+
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/container_news_content_sv"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/container_news_content_header_minus_size">
 
-            <android.support.v4.widget.NestedScrollView
-                android:id="@+id/container_news_content_sv"
+            <WebView
+                android:id="@+id/container_news_content_wv"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="-200dp">
+                android:layout_height="match_parent">
 
-                <WebView
-                    android:id="@+id/container_news_content_wv"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+            </WebView>
 
-                </WebView>
-
-            </android.support.v4.widget.NestedScrollView>
+        </android.support.v4.widget.NestedScrollView>
 
 
-        </FrameLayout>
     </android.support.v4.widget.NestedScrollView>
 
     <FrameLayout
@@ -106,8 +101,8 @@
         <ProgressBar
             android:id="@+id/container_news_content_pbi"
             style="?android:attr/progressBarStyleLarge"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="@dimen/progress_bar_size"
+            android:layout_height="@dimen/progress_bar_size"
             android:layout_gravity="center"
             android:indeterminate="true" />
     </FrameLayout>
@@ -118,7 +113,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="@dimen/container_news_content_header_size"
         android:background="@color/colorPrimaryDark">
 
         <FrameLayout
@@ -136,7 +131,7 @@
         android:id="@+id/container_news_content_pb"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="2.5dp"
+        android:layout_height="@dimen/progress_bar_horizontal_height"
         android:layout_gravity="bottom"
         android:max="100"
         app:layout_anchor="@+id/container_news_content_appbar_ly"

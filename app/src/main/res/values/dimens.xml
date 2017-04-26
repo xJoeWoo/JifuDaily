@@ -5,4 +5,24 @@
     <item name="anim_default_delay" format="string" type="dimen">130</item>
     <item name="anim_default_delay2" format="string" type="dimen">260</item>
     <item name="anim_default_delay3" format="string" type="dimen">390</item>
+
+    <dimen name="item_latest_news_height">96dp</dimen>
+    <dimen name="item_latest_news_padding_vertical">8dp</dimen>
+    <dimen name="item_latest_news_padding_horizontal">16dp</dimen>
+    <dimen name="item_latest_news_text_margin_icon">18dp</dimen>
+    <dimen name="item_latest_news_text_margin_edge">4dp</dimen>
+    <dimen name="item_text_size">17sp</dimen>
+
+    <dimen name="container_news_content_header_size">200dp</dimen>
+    <dimen name="container_news_content_header_minus_size">-200dp</dimen>
+    <dimen name="container_news_content_header_title_size">22sp</dimen>
+    <dimen name="container_news_content_header_title_margin">16dp</dimen>
+
+    <dimen name="progress_bar_size">64dp</dimen>
+    <dimen name="progress_bar_horizontal_height">2.5dp</dimen>
+
+
+    <dimen name="line_space_extra">6sp</dimen>
+
+    <dimen name="auto">0dp</dimen>
 </resources>

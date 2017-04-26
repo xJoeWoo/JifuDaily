@@ -57,8 +57,6 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
 //    ProgressBar pbi;
     @BindView(R.id.container_news_content_blocker_bg)
     View blockerBg;
-    @BindView(R.id.container_news_content_holder)
-    View holder;
     @BindView(R.id.container_news_content_pbi_bg)
     View pgiBg;
     @BindView(R.id.container_news_content_wrapper)

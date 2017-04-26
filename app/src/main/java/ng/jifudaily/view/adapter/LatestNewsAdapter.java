@@ -98,8 +98,8 @@ public class LatestNewsAdapter extends ObservableRecyclerViewAdapter<LatestNewsA
 
         if (e.getImages() != null && e.getImages().size() > 0) {
             picasso.load(e.getImages().get(0))
-                    .error(R.drawable.ic_imageholder)
-                    .placeholder(R.drawable.ic_imageholder)
+                    .error(R.drawable.ic_image_holder)
+                    .placeholder(R.drawable.ic_image_holder)
                     .transform(circleTransform)
                     .into(holder.getIv());
         }
