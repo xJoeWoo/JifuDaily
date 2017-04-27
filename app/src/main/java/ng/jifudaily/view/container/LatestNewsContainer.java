@@ -21,8 +21,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 import ng.jifudaily.R;
 import ng.jifudaily.support.container.Container;
-import ng.jifudaily.support.ioc.service.AnimUtil;
 import ng.jifudaily.support.net.entity.StoryEntity;
+import ng.jifudaily.support.util.anim.AnimUtil;
 import ng.jifudaily.view.adapter.LatestNewsAdapter;
 
 /**
@@ -51,13 +51,13 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
         public void onSuccess() {
             if (usingIv2) {
                 iv2.setVisibility(View.VISIBLE);
-                AnimUtil.fadeIn(iv2, AnimUtil.DEFAULT_DURATION, new AnimUtil.ObjectArgs().end(x -> {
+                AnimUtil.fadeIn(iv2, AnimUtil.DEFAULT_DURATION, AnimUtil.AnimArgs.create().end(x -> {
                     iv.setImageResource(android.R.color.transparent);
                     iv.setVisibility(View.GONE);
                 }));
             } else {
                 iv.setVisibility(View.VISIBLE);
-                AnimUtil.fadeOut(iv2, AnimUtil.DEFAULT_DURATION, new AnimUtil.ObjectArgs().end(x -> {
+                AnimUtil.fadeOut(iv2, AnimUtil.DEFAULT_DURATION, AnimUtil.AnimArgs.create().end(x -> {
                     iv2.setImageResource(android.R.color.transparent);
                     iv2.setVisibility(View.GONE);
                 }));

@@ -130,7 +130,7 @@ public abstract class Container<T extends Container<T>> implements LifeCycle, Di
     }
 
     public View createContainingView() {
-        containingView = LayoutInflater.from(getManager().getActivity()).inflate(getBindLayoutId(), null);
+        containingView = LayoutInflater.from(getManager().getActivity()).inflate(getBindLayoutId(), null, false);
         containingView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {

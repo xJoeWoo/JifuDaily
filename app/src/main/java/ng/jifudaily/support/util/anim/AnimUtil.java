@@ -1,4 +1,4 @@
-package ng.jifudaily.support.ioc.service;
+package ng.jifudaily.support.util.anim;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -22,6 +22,7 @@ import ng.jifudaily.support.util.Action;
  * Created by Ng on 2017/4/24.
  */
 
+//TODO refactor this util to service and remove dependency to AndroidViewAnimations
 public final class AnimUtil {
 
     public static final int DEFAULT_DURATION = 350;
@@ -30,26 +31,30 @@ public final class AnimUtil {
     public static final AccelerateInterpolator ACCELERATE_INTERPOLATOR = new AccelerateInterpolator();
     public static final AccelerateDecelerateInterpolator ACCELERATE_DECELERATE_INTERPOLATOR = new AccelerateDecelerateInterpolator();
 
-    public static void object(@NonNull View v, String propertyName, ObjectArgs args, int... ints) {
+
+    public static Animator object(@NonNull View v, String propertyName, AnimArgs args, int... ints) {
 
         if (args == null) {
-            args = new ObjectArgs();
+            args = new AnimArgs();
         }
 
         ObjectAnimator anim = ObjectAnimator.ofInt(v, propertyName, ints);
         anim.setDuration(args.getDuration());
         anim.setInterpolator(args.getInterpolator());
         anim.addListener(args.getListener());
-        anim.start();
+        if (args.isStartImmediately()) {
+            anim.start();
+        }
+        return anim;
     }
 
-    public static Animator circularReveal(@NonNull View v, boolean show, int duration, ObjectArgs args) {
+    public static Animator circularReveal(@NonNull View v, boolean show, int duration, AnimArgs args) {
         Rect r = new Rect();
         v.getLocalVisibleRect(r);
         return circularReveal(v, v.getWidth() / 2 + r.left, v.getHeight() / 2 + r.top, show, duration, args);
     }
 
-    public static Animator circularReveal(@NonNull View v, int x, int y, boolean show, int duration, @Nullable ObjectArgs args) {
+    public static Animator circularReveal(@NonNull View v, int x, int y, boolean show, int duration, @Nullable AnimArgs args) {
 
         Rect r = new Rect();
         v.getGlobalVisibleRect(r);
@@ -70,9 +75,8 @@ public final class AnimUtil {
         y = y - r.top;
 
         Animator circularReveal = ViewAnimationUtils.createCircularReveal(v, x, y, from, to);
-
         if (args == null) {
-            args = new ObjectArgs().interpolator(ACCELERATE_INTERPOLATOR);
+            args = new AnimArgs().interpolator(ACCELERATE_INTERPOLATOR);
         } else if (!args.isInterpolatorInited()) {
             args = args.interpolator(ACCELERATE_INTERPOLATOR);
         }
@@ -88,26 +92,33 @@ public final class AnimUtil {
 //            }
 //        });
         circularReveal.setDuration(duration);
-        circularReveal.start();
+        if (args.isStartImmediately()) {
+            circularReveal.start();
+        }
         return circularReveal;
     }
 
-    public static void fadeIn(@NonNull View v, int duration, ObjectArgs args) {
+    public static void fadeIn(View v, int duration, AnimArgs args) {
         anim(v, duration, args, Techniques.FadeIn);
     }
 
-    public static void fadeOut(@NonNull View v, int duration, ObjectArgs args) {
+    public static void fadeOut(View v, int duration, AnimArgs args) {
         anim(v, duration, args, Techniques.FadeOut);
     }
 
-    public static void zoomOut(@NonNull View v, int duration, ObjectArgs args) {
+    public static void zoomOut(View v, int duration, AnimArgs args) {
         anim(v, duration, args, Techniques.ZoomOut);
     }
 
-    private static void anim(@NonNull View v, int duration, ObjectArgs args, Techniques techniques) {
-        if (args == null) {
-            args = new ObjectArgs();
+    private static void anim(View v, int duration, AnimArgs args, Techniques techniques) {
+        if (v == null) {
+            return;
         }
+        if (args == null) {
+            args = new AnimArgs();
+        }
+
+
         YoYo.AnimationComposer c = YoYo.with(techniques)
                 .duration(duration)
                 .withListener(args.getListener())
@@ -116,8 +127,8 @@ public final class AnimUtil {
         c.playOn(v);
     }
 
-    public static class ObjectArgs {
-
+    //TODO move outside
+    public static class AnimArgs {
 
         private int duration = DEFAULT_DURATION;
         private Interpolator interpolator;
@@ -128,12 +139,29 @@ public final class AnimUtil {
         private Action<Animator> end;
         private boolean initedListeners = false;
         private boolean initedInterpolator = false;
+        private boolean isStartImmediately = true;
+
+        private AnimArgs() {
+        }
+
+        public static AnimArgs create() {
+            return new AnimArgs();
+        }
+
+        public boolean isStartImmediately() {
+            return isStartImmediately;
+        }
+
+        public AnimArgs setStartImmediately(boolean startImmediately) {
+            isStartImmediately = startImmediately;
+            return this;
+        }
 
         public int getDelay() {
             return delay;
         }
 
-        public ObjectArgs delay(int delay) {
+        public AnimArgs delay(int delay) {
             this.delay = delay;
             return this;
         }
@@ -142,7 +170,7 @@ public final class AnimUtil {
             return duration;
         }
 
-        public ObjectArgs duration(int duration) {
+        public AnimArgs duration(int duration) {
             this.duration = duration;
             return this;
         }
@@ -158,19 +186,19 @@ public final class AnimUtil {
             return initedInterpolator;
         }
 
-        public ObjectArgs interpolator(Interpolator interpolator) {
+        public AnimArgs interpolator(Interpolator interpolator) {
             this.interpolator = interpolator;
             initedInterpolator = true;
             return this;
         }
 
-        public ObjectArgs start(Action<Animator> start) {
+        public AnimArgs start(Action<Animator> start) {
             this.start = start;
             initedListeners = true;
             return this;
         }
 
-        public ObjectArgs end(Action<Animator> end) {
+        public AnimArgs end(Action<Animator> end) {
             this.end = end;
             initedListeners = true;
             return this;
@@ -184,6 +212,11 @@ public final class AnimUtil {
         public AnimatorListenerAdapter getListener() {
             if (listener == null) {
                 listener = new AnimatorListenerAdapter() {
+
+                    @Override
+                    public void onAnimationPause(Animator animation) {
+                        super.onAnimationPause(animation);
+                    }
 
                     @Override
                     public void onAnimationStart(Animator animation) {

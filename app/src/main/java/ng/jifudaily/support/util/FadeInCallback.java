@@ -5,7 +5,7 @@ import android.widget.ImageView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import ng.jifudaily.support.ioc.service.AnimUtil;
+import ng.jifudaily.support.util.anim.AnimUtil;
 
 /**
  * Created by Ng on 2017/4/24.
@@ -15,16 +15,16 @@ public class FadeInCallback implements Callback {
 
     private ImageView view;
     private int duration;
-    private AnimUtil.ObjectArgs listener;
+    private AnimUtil.AnimArgs listener;
 
 
-    private FadeInCallback(ImageView v, int duration, AnimUtil.ObjectArgs listener) {
+    private FadeInCallback(ImageView v, int duration, AnimUtil.AnimArgs listener) {
         this.view = v;
         this.duration = duration;
         this.listener = listener;
     }
 
-    public static FadeInCallback createInstance(ImageView v, int duration, AnimUtil.ObjectArgs listener) {
+    public static FadeInCallback createInstance(ImageView v, int duration, AnimUtil.AnimArgs listener) {
         return new FadeInCallback(v, duration, listener);
     }
 

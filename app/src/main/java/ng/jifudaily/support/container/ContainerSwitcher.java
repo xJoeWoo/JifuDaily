@@ -88,21 +88,30 @@ public final class ContainerSwitcher {
             TransitionManager.beginDelayedTransition(parent, transitionSet);
             parent.addView(toShowView, index);
         } else {
-            ViewParent root = showingViewParent;
-            if (root == null) {
+            ViewParent parent = showingViewParent;
+            if (parent == null) {
                 containerManager.getActivity().setContentView(getDefaultRootLayout());
-                root = getDefaultRootLayout();
+                parent = getDefaultRootLayout();
             }
-            Scene sTo = new Scene((ViewGroup) root, toShowView);
-//            if (showingView != null) {
-//                Scene sFrom = new Scene((ViewGroup) container_news_content_root, showingView);
-//                TransitionManager t = new TransitionManager();
-//                t.setTransition(sFrom, sTo, transitionSet);
-//                t.transitionTo(sTo);
-//            } else {
-            TransitionManager.go(sTo, transitionSet);
+            ViewGroup viewGroupParent = (ViewGroup) parent;
+            TransitionManager t = new TransitionManager();
+            Scene sTo = new Scene(viewGroupParent, toShowView);
+            t.setTransition(sTo, transitionSet);
+            if (showingView != null) {
+                Scene sFrom = new Scene((ViewGroup) parent, showingView);
+                t.setTransition(sFrom, sTo, transitionSet);
+            }
 
-//            }
+            // when quickly press back source view haven't finished anim,
+            // the toShowView will have an "animation overlay view" parent,
+            // need to remove it first, or entire app will crash due to "The specified child already has a parent"
+            if (toShowView.getParent() != null) {
+                ((ViewGroup) toShowView.getParent()).removeView(toShowView);
+            }
+
+
+            t.transitionTo(sTo);
+
         }
 
         target.setAttached(true);

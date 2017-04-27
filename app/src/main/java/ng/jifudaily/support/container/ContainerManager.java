@@ -119,16 +119,15 @@ public class ContainerManager {
 
     public void callContainers(final Action<Container> callback) {
 //        containers.forEach(x->callback.onCall(x));
-        for (Container c :
-                containers) {
+        for (Container c : containers) {
             callback.onCall(c);
         }
     }
 
     public boolean onBackPressed() {
-        for (Container c :
-                containers) {
+        for (Container c : containers) {
             if (c.isAttached() && c.onBackPressed()) {
+
                 return true;
             }
         }

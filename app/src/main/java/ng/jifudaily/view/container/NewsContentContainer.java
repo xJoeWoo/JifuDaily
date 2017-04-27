@@ -20,12 +20,12 @@ import android.widget.TextView;
 import butterknife.BindView;
 import ng.jifudaily.R;
 import ng.jifudaily.support.container.Container;
-import ng.jifudaily.support.ioc.service.AnimUtil;
 import ng.jifudaily.support.net.entity.NewsContentEntity;
 import ng.jifudaily.support.net.entity.StoryEntity;
 import ng.jifudaily.support.util.DpUtil;
 import ng.jifudaily.support.util.FadeInCallback;
 import ng.jifudaily.support.util.TransitionListenerAdapter;
+import ng.jifudaily.support.util.anim.AnimUtil;
 import ng.jifudaily.view.base.AppbarImageView;
 
 
@@ -80,8 +80,9 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 super.onProgressChanged(view, newProgress);
-                pb.setProgress(newProgress);
-
+                if (isAttached()) {
+                    pb.setProgress(newProgress);
+                }
             }
         });
         wv.setWebViewClient(new WebViewClient() {
@@ -91,7 +92,7 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
 
                 if (isAttached()) {
                     if (news != null) {
-                        AnimUtil.object(wrapper, "scrollY", new AnimUtil.ObjectArgs().duration(AnimUtil.DEFAULT_DURATION * 2).interpolator(AnimUtil.ACCELERATE_DECELERATE_INTERPOLATOR), 0, positions.get(news.getId()));
+                        AnimUtil.object(wrapper, "scrollY", AnimUtil.AnimArgs.create().duration(AnimUtil.DEFAULT_DURATION * 2).interpolator(AnimUtil.ACCELERATE_DECELERATE_INTERPOLATOR), 0, positions.get(news.getId()));
                     }
                     AnimUtil.fadeOut(pb, AnimUtil.DEFAULT_DURATION / 2, null);
                     AnimUtil.fadeOut(pgiBg, AnimUtil.DEFAULT_DURATION / 2, null);
@@ -131,7 +132,6 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
     @Override
     public void onDetached() {
         super.onDetached();
-        wv.stopLoading();
         story = null;
         news = null;
     }
@@ -144,8 +144,14 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
             public void onTransitionStart(Transition transition) {
                 super.onTransitionStart(transition);
                 MotionEvent motionEvent = getManager().getActivity().getLatestMotion();
-                AnimUtil.circularReveal(blocker, (int) motionEvent.getX(), (int) motionEvent.getY(), true, AnimUtil.DEFAULT_DURATION, new AnimUtil.ObjectArgs().delay(150).end(x -> {
-                    AnimUtil.fadeOut(blockerBg, AnimUtil.DEFAULT_DURATION, new AnimUtil.ObjectArgs().end(xx -> blockerBg.setVisibility(View.GONE)));
+
+
+                AnimUtil.circularReveal(blocker, (int) motionEvent.getX(), (int) motionEvent.getY(), true, AnimUtil.DEFAULT_DURATION, AnimUtil.AnimArgs.create().delay(150).end(x -> {
+                    AnimUtil.fadeOut(blockerBg, AnimUtil.DEFAULT_DURATION, AnimUtil.AnimArgs.create().end(xx -> {
+                        if (blockerBg != null) {
+                            blockerBg.setVisibility(View.GONE);
+                        }
+                    }));
                 }));
             }
 
@@ -181,9 +187,11 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
 
     @Override
     public boolean onBackPressed() {
+        wv.stopLoading();
         if (news != null) {
             positions.put(news.getId(), wrapper.getScrollY());
         }
+
         if (appbarLayoutExpended) {
 
             // imageview in appbar layout will disappear when change scene, so 麻烦
@@ -198,7 +206,7 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
                 return false;
             }
         }
-        AnimUtil.object(wrapper, "scrollY", new AnimUtil.ObjectArgs().duration(AnimUtil.DEFAULT_DURATION).interpolator(AnimUtil.DECELERATE_INTERPOLATOR).end(x -> getManager().getSwitcher().back()), wrapper.getScrollY(), 0);
+        AnimUtil.object(wrapper, "scrollY", AnimUtil.AnimArgs.create().duration(AnimUtil.DEFAULT_DURATION).interpolator(AnimUtil.DECELERATE_INTERPOLATOR).end(x -> getManager().getSwitcher().back()), wrapper.getScrollY(), 0);
         return true;
     }
 }

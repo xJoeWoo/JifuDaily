@@ -71,6 +71,10 @@
         android:scrollbars="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <FrameLayout
+            android:id="@+id/container_news_content_holder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/container_news_content_sv"
@@ -88,6 +92,7 @@
         </android.support.v4.widget.NestedScrollView>
 
 
+        </FrameLayout>
     </android.support.v4.widget.NestedScrollView>
 
     <FrameLayout

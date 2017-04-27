@@ -27,6 +27,7 @@
             android:lineSpacingExtra="@dimen/line_space_extra"
             android:textColor="@color/item_text_default"
             android:textSize="@dimen/item_text_size"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/item_latest_news_iv"
