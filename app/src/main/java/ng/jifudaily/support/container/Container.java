@@ -22,7 +22,7 @@ import ng.jifudaily.view.base.ContainerActivity;
  * Created by Ng on 2017/4/21.
  */
 
-public abstract class Container<T extends Container<T>> implements LifeCycle, Disposable {
+public class Container<T> implements LifeCycle, Disposable {
 
     public static final int DEFAULT_ID = -1;
 

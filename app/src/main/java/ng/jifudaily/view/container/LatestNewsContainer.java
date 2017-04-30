@@ -22,7 +22,9 @@ import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 import ng.jifudaily.R;
 import ng.jifudaily.support.container.Container;
 import ng.jifudaily.support.net.entity.StoryEntity;
+import ng.jifudaily.support.util.anim.AnimArgs;
 import ng.jifudaily.support.util.anim.AnimUtil;
+import ng.jifudaily.support.util.anim.Anims;
 import ng.jifudaily.view.adapter.LatestNewsAdapter;
 
 /**
@@ -49,23 +51,33 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
     private Callback.EmptyCallback callback = new Callback.EmptyCallback() {
         @Override
         public void onSuccess() {
+
             if (usingIv2) {
-                iv2.setVisibility(View.VISIBLE);
-                AnimUtil.fadeIn(iv2, AnimUtil.DEFAULT_DURATION, AnimUtil.AnimArgs.create().end(x -> {
-                    iv.setImageResource(android.R.color.transparent);
-                    iv.setVisibility(View.GONE);
-                }));
+
+                AnimUtil.with(iv2).using(Anims.FadeIn)
+                        .onStart(x -> iv2.setVisibility(View.VISIBLE))
+                        .onEnd(x -> {
+                            iv.setImageResource(android.R.color.transparent);
+                            iv.setVisibility(View.GONE);
+                        })
+                        .start();
             } else {
-                iv.setVisibility(View.VISIBLE);
-                AnimUtil.fadeOut(iv2, AnimUtil.DEFAULT_DURATION, AnimUtil.AnimArgs.create().end(x -> {
-                    iv2.setImageResource(android.R.color.transparent);
-                    iv2.setVisibility(View.GONE);
-                }));
+                AnimArgs args = AnimUtil.with(iv2).using(Anims.FadeOut)
+                        .onStart(x -> iv.setVisibility(View.VISIBLE))
+                        .onEnd(x -> {
+                            iv2.setVisibility(View.GONE);
+                            iv2.setImageResource(android.R.color.transparent);
+                        });
+
+                if (firstOpen) {
+                    args.with(iv).using(Anims.FadeIn);
+                    firstOpen = false;
+                }
+
+                args.start();
+
             }
-            if (firstOpen) {
-                AnimUtil.fadeIn(iv, AnimUtil.DEFAULT_DURATION, null);
-                firstOpen = false;
-            }
+
             getServices().net().picasso().cancelRequest(usingIv2 ? iv2 : iv);
             usingIv2 = !usingIv2;
         }
@@ -96,8 +108,13 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
     @Override
     public void onAttached() {
         super.onAttached();
-        changeTitleImage();
+
         getManager().getActivity().setSupportActionBar((Toolbar) getContainingView().findViewById(R.id.container_latest_news_toolbar));
+    }
+
+    @Override
+    protected void onViewDrawn(View v) {
+        super.onViewDrawn(v);
     }
 
     @OnClick({R.id.container_latest_news_toolbar_iv, R.id.container_latest_news_toolbar_iv2})
@@ -146,6 +163,8 @@ public class LatestNewsContainer extends Container<LatestNewsContainer> {
             return;
         }
         getServices().net().picasso().load(s.getImages().get(0)).noFade().into(usingIv2 ? iv2 : iv, callback);
+//        getServices().net().picasso().load(s.getImages().get(0)).noFade().into(iv,callback);
+//        usingIv2 = !usingIv2;
     }
 
 

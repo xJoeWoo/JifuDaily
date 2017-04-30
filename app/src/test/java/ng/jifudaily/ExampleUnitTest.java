@@ -2,14 +2,24 @@ package ng.jifudaily;
 
 import org.junit.Test;
 
+import java.lang.reflect.Constructor;
+import java.util.Map;
+
 /**
  * Example local unit test, which will execute on the development machine (host).
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class ExampleUnitTest {
+
     @Test
     public void Test() throws Exception {
+
+
+        for (Constructor c : a.class.getConstructors()) {
+            c.getParameterTypes();
+        }
+
 //
 //        try {
 //            ServiceComponent s = DaggerServiceComponent.create();
@@ -47,5 +57,11 @@ public class ExampleUnitTest {
 //        }
 
 
+    }
+
+    class a {
+        public a(Map<String, String> dd) {
+
+        }
     }
 }

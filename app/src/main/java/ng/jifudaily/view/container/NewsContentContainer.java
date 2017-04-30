@@ -1,6 +1,7 @@
 package ng.jifudaily.view.container;
 
 import android.graphics.Rect;
+import android.support.annotation.Px;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +12,8 @@ import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -22,10 +25,13 @@ import ng.jifudaily.R;
 import ng.jifudaily.support.container.Container;
 import ng.jifudaily.support.net.entity.NewsContentEntity;
 import ng.jifudaily.support.net.entity.StoryEntity;
-import ng.jifudaily.support.util.DpUtil;
 import ng.jifudaily.support.util.FadeInCallback;
-import ng.jifudaily.support.util.TransitionListenerAdapter;
+import ng.jifudaily.support.util.adapter.TransitionListenerAdapter;
+import ng.jifudaily.support.util.anim.AnimArgs;
 import ng.jifudaily.support.util.anim.AnimUtil;
+import ng.jifudaily.support.util.anim.Anims;
+import ng.jifudaily.support.util.anim.CircularRevealAnimArgs;
+import ng.jifudaily.support.util.anim.ObjectAnimArgs;
 import ng.jifudaily.view.base.AppbarImageView;
 
 
@@ -35,6 +41,8 @@ import ng.jifudaily.view.base.AppbarImageView;
 
 public class NewsContentContainer extends Container<NewsContentContainer> {
 
+    @Px
+    private static int headerHeight;
     private final SparseIntArray positions = new SparseIntArray();
     @BindView(R.id.container_news_content_appbar_ly)
     AppBarLayout appBar;
@@ -89,13 +97,17 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-
                 if (isAttached()) {
-                    if (news != null) {
-                        AnimUtil.object(wrapper, "scrollY", AnimUtil.AnimArgs.create().duration(AnimUtil.DEFAULT_DURATION * 2).interpolator(AnimUtil.ACCELERATE_DECELERATE_INTERPOLATOR), 0, positions.get(news.getId()));
+                    AnimArgs<?> args = AnimUtil.with(pb, pgiBg).using(Anims.FadeOut)
+                            .duration(AnimUtil.DEFAULT_DURATION_HALF);
+                    if (news != null && positions.get(news.getId()) != 0) {
+                        args.with(ObjectAnimArgs.class, wrapper).using(Anims.Object)
+                                .duration(AnimUtil.DEFAULT_DURATION_DUO)
+                                .property("scrollY")
+                                .interpolator(new AccelerateDecelerateInterpolator())
+                                .intValues(0, positions.get(news.getId()) + headerHeight);
                     }
-                    AnimUtil.fadeOut(pb, AnimUtil.DEFAULT_DURATION / 2, null);
-                    AnimUtil.fadeOut(pgiBg, AnimUtil.DEFAULT_DURATION / 2, null);
+                    args.start();
                 }
             }
         });
@@ -127,6 +139,7 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
             getServices().daily().getNewsContent(story.getId()).subscribe(NewsContentContainer.this::processNewsContent, error -> {
             });
         }
+        headerHeight = getManager().getActivity().getResources().getDimensionPixelSize(R.dimen.container_news_content_header_size);
     }
 
     @Override
@@ -145,14 +158,18 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
                 super.onTransitionStart(transition);
                 MotionEvent motionEvent = getManager().getActivity().getLatestMotion();
 
-
-                AnimUtil.circularReveal(blocker, (int) motionEvent.getX(), (int) motionEvent.getY(), true, AnimUtil.DEFAULT_DURATION, AnimUtil.AnimArgs.create().delay(150).end(x -> {
-                    AnimUtil.fadeOut(blockerBg, AnimUtil.DEFAULT_DURATION, AnimUtil.AnimArgs.create().end(xx -> {
-                        if (blockerBg != null) {
-                            blockerBg.setVisibility(View.GONE);
-                        }
-                    }));
-                }));
+                AnimUtil.with(CircularRevealAnimArgs.class, blocker).using(Anims.CircularRevealIn)
+                        .delay(150)
+                        .x((int) motionEvent.getX())
+                        .y((int) motionEvent.getY())
+                        .relative(false)
+                        .with(blockerBg).using(Anims.FadeOut)
+                        .onEnd(x -> {
+                            if (blockerBg != null) {
+                                blockerBg.setVisibility(View.GONE);
+                            }
+                        })
+                        .start();
             }
 
             @Override
@@ -202,11 +219,17 @@ public class NewsContentContainer extends Container<NewsContentContainer> {
                 iv2.setImageDrawable(iv.getDrawable());
                 iv2.setY(r.top);
             }
-            if (wrapper.getScrollY() <= DpUtil.dpToPx(200)) {
+            if (wrapper.getScrollY() <= headerHeight) {
                 return false;
             }
         }
-        AnimUtil.object(wrapper, "scrollY", AnimUtil.AnimArgs.create().duration(AnimUtil.DEFAULT_DURATION).interpolator(AnimUtil.DECELERATE_INTERPOLATOR).end(x -> getManager().getSwitcher().back()), wrapper.getScrollY(), 0);
+
+        AnimUtil.with(ObjectAnimArgs.class, wrapper).using(Anims.Object)
+                .property("scrollY")
+                .intValues(wrapper.getScrollY(), 0)
+                .interpolator(new DecelerateInterpolator())
+                .onEnd(x -> getManager().getSwitcher().back())
+                .start();
         return true;
     }
 }

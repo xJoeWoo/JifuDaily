@@ -33,7 +33,7 @@ public class ContainerManager {
     }
 
     public ContainerManager add(Container container) {
-        getContainers().add(container.manager(this));
+        getContainers().add((Container) container.manager(this));
         return this;
     }
 
@@ -85,9 +85,6 @@ public class ContainerManager {
 
     /**
      * If id is used in more than one container, then return the first container matches provided id
-     *
-     * @param containerId
-     * @return
      */
     @Nullable
     public <T extends Container<T>> T getContainer(int containerId, Class<T> clz) {

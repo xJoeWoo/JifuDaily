@@ -1,4 +1,4 @@
-package ng.jifudaily.support.util;
+package ng.jifudaily.support.util.adapter;
 
 import android.transition.Transition;
 
@@ -6,7 +6,7 @@ import android.transition.Transition;
  * Created by Ng on 2017/4/24.
  */
 
-public class TransitionListenerAdapter implements Transition.TransitionListener {
+public abstract class TransitionListenerAdapter implements Transition.TransitionListener {
 
     @Override
     public void onTransitionStart(Transition transition) {

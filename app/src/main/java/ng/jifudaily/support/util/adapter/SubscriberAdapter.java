@@ -1,11 +1,7 @@
-package ng.jifudaily.support.util;
+package ng.jifudaily.support.util.adapter;
 
 import android.util.Log;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
-import io.reactivex.subscribers.DefaultSubscriber;
 import io.reactivex.subscribers.DisposableSubscriber;
 
 /**

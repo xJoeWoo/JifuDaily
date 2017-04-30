@@ -1,4 +1,4 @@
-package ng.jifudaily.support.util;
+package ng.jifudaily.support.util.adapter;
 
 import android.support.v7.widget.RecyclerView;
 

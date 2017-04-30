@@ -11,7 +11,7 @@
     <dimen name="item_latest_news_padding_horizontal">16dp</dimen>
     <dimen name="item_latest_news_text_margin_icon">18dp</dimen>
     <dimen name="item_latest_news_text_margin_edge">4dp</dimen>
-    <dimen name="item_text_size">17sp</dimen>
+    <dimen name="item_text_size">16sp</dimen>
 
     <dimen name="container_news_content_header_size">200dp</dimen>
     <dimen name="container_news_content_header_minus_size">-200dp</dimen>

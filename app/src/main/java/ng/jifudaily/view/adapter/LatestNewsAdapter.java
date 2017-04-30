@@ -17,8 +17,8 @@ import io.reactivex.disposables.Disposable;
 import ng.jifudaily.R;
 import ng.jifudaily.support.net.entity.StoryEntity;
 import ng.jifudaily.support.util.CircleTransform;
-import ng.jifudaily.support.util.ObservableRecyclerViewAdapter;
-import ng.jifudaily.support.util.ViewHolderClickListener;
+import ng.jifudaily.support.util.adapter.ObservableRecyclerViewAdapter;
+import ng.jifudaily.support.util.adapter.ViewHolderClickListener;
 import ng.jifudaily.view.base.SquareImageView;
 
 /**
